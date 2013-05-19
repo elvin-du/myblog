@@ -34,15 +34,15 @@ func (c *Controller)Login(w http.ResponseWriter, r *http.Request){
 			log.Println(err)
 			return
 		}
-		http.Redirect(w,r,"/blog",http.StatusFound)
+		http.Redirect(w,r,"/index",http.StatusFound)
 	}
 }
 
-func (c *Controller)Blog(w http.ResponseWriter, r *http.Request){
-	log.Println("entered Blog()")
+func (c *Controller)Index(w http.ResponseWriter, r *http.Request){
+	log.Println("entered Index()")
 	switch r.Method{
 	case "GET":
-		t,err := template.ParseFiles("views/blog.html")
+		t,err := template.ParseFiles("views/index.html")
 		if nil != err{
 			log.Println(err)
 			return

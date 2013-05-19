@@ -24,7 +24,7 @@ func Register(w http.ResponseWriter, r *http.Request){
 		ctrl.Register(w,r)
 	case "/edit" == urlPath:
 		ctrl.Edit(w,r)
-	case "/blog" == urlPath:
-		ctrl.Blog(w,r)
+	case "/index" == urlPath:
+		ctrl.Index(w,r)
 	}
 }
