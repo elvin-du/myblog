@@ -2,35 +2,155 @@ package models
 
 import(
 	_"github.com/Go-SQL-Driver/MySQL"
+	"html"
 )
 
-type model struct{
+type Model struct{
 }
 
-func (db *model)CheckNamePsw(name,psw string)error{
+type Condition struct{
+	con_type string //VALUE:"byDate","byTypeID","byTitle"
+	date string //which year
+	title string
+	type_id int
+}
+
+func (m *Model)CheckNamePsw(name,psw string)error{
+	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
+	if nil != err{
+		log.Print(err)
+		return err
+	}
+	defer db.Close()
+	querySql := "select 1 from myblog.users WHERE name = ' " + html.EscapeString(name) + "'"
+	rows, err := db.Query(querySql)
+	if nil != err{
+		log.Print(err)
+		return err
+	}
+	if rows.Next(){
+		return errors.New("user " + name + "exsited")
+	}
+
+	return nil
+}
+
+func (m *Model)AddUser(name,psw string)error{
+	username := html.EscapeString(name)
+	password := html.EscapeString(psw)
+	
+	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
+	if nil != err{
+		log.Print(err)
+		return err
+	}
+	defer db.Close()
+	querySql := "select 1 from myblog.users WHERE name = ' " + username "'"
+	rows, err := db.Query(querySql)
+	if nil != err{
+		log.Print(err)
+		return err
+	}
+	if rows.Next(){
+		return errors.New("user " + name + "exsited")
+	}
+
+
+	insertSql := "INSERT myblog.users SET name=?, password=?"
+	stmt, err := db.Prepare(insertSql)
+	if nil != err{
+		log.Print(err)
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(username, password)
+	if nil != err{
+		log.Print(err)
+		return err
+	}
+
+	return nil
+}
+
+func (m *Model)EditBlogs(newBlog string)error{
 
 }
 
-func (db *model)AddUser(name,psw string)error{
-}
+func (m *Model)AddBlogs(title,blog string)error{
+	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
+	if nil != err{
+		log.Print(err)
+		return err
+	}
+	defer db.Close()
+	querySql := "select name from myblog.blogs WHERE title = ' " + html.EscapeString(title) + "'"
+	rows, err := db.Query(querySql)
+	if nil != err{
+		log.Print(err)
+		return err
+	}
+	if rows.Next(){
+		return errors.New("title exsited")
+	}
 
-func (db *model)EditBlogs(newBlog string)error{
+	insertSql := "INSERT myblog.users SET name=?, password=?"
+	stmt, err := db.Prepare(insertSql)
+	if nil != err{
+		log.Print(err)
+		return err
+	}
+	defer stmt.Close()
 
-}
+	_, err = stmt.Exec(username, password)
+	if nil != err{
+		log.Print(err)
+		return err
+	}
 
-func (db *model)AddBlogs(title,blog string)error{
-
-}
-
-func (db *model)DelBlogs(title string)error{
+	return nil
 }
 
 //query condition perhaps change,so agument type is interface
-func (db *model)QueryBlogs(condition interface{})error{
+func (m *Model)QueryBlogs(condition interface{})error{
+	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
+	if nil != err{
+		log.Print(err)
+		return err
+	}
+	defer db.Close()
+	querySql := "select name from myblog.blogs WHERE title = ' " + html.EscapeString(title) + "'"
+	rows, err := db.Query(querySql)
+	if nil != err{
+		log.Print(err)
+		return err
+	}
+	if rows.Next(){
+		return errors.New("title exsited")
+	}
+
+	insertSql := "INSERT myblog.users SET name=?, password=?"
+	stmt, err := db.Prepare(insertSql)
+	if nil != err{
+		log.Print(err)
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(username, password)
+	if nil != err{
+		log.Print(err)
+		return err
+	}
+
+	return nil
 }
 
-func (db *model)AddComments(title, commtent string)error{
+func (m *Model)DelBlogs(title string)error{
 }
 
-func (db *model)DelComments(title string)error{
+func (m *Model)AddComments(title, commtent string)error{
+}
+
+func (m *Model)DelComments(title string)error{
 }
