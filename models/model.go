@@ -3,6 +3,9 @@ package models
 import(
 	_"github.com/Go-SQL-Driver/MySQL"
 	"html"
+	"log"
+	"errors"
+	"database/sql"
 )
 
 type Model struct{
@@ -38,14 +41,13 @@ func (m *Model)CheckNamePsw(name,psw string)error{
 func (m *Model)AddUser(name,psw string)error{
 	username := html.EscapeString(name)
 	password := html.EscapeString(psw)
-	
 	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
 	if nil != err{
 		log.Print(err)
 		return err
 	}
 	defer db.Close()
-	querySql := "select 1 from myblog.users WHERE name = ' " + username "'"
+	querySql := "select 1 from myblog.users WHERE name = ' " + username + "'"
 	rows, err := db.Query(querySql)
 	if nil != err{
 		log.Print(err)
@@ -74,7 +76,7 @@ func (m *Model)AddUser(name,psw string)error{
 }
 
 func (m *Model)EditBlogs(newBlog string)error{
-
+	return nil
 }
 
 func (m *Model)AddBlogs(title,blog string)error{
@@ -102,7 +104,7 @@ func (m *Model)AddBlogs(title,blog string)error{
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(username, password)
+//	_, err = stmt.Exec(username, password)
 	if nil != err{
 		log.Print(err)
 		return err
@@ -119,7 +121,7 @@ func (m *Model)QueryBlogs(condition interface{})error{
 		return err
 	}
 	defer db.Close()
-	querySql := "select name from myblog.blogs WHERE title = ' " + html.EscapeString(title) + "'"
+	querySql := "select name from myblog.blogs WHERE title = ' " //+ html.EscapeString(title) + "'"
 	rows, err := db.Query(querySql)
 	if nil != err{
 		log.Print(err)
@@ -137,7 +139,7 @@ func (m *Model)QueryBlogs(condition interface{})error{
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(username, password)
+	//_, err = stmt.Exec(username, password)
 	if nil != err{
 		log.Print(err)
 		return err
@@ -147,10 +149,13 @@ func (m *Model)QueryBlogs(condition interface{})error{
 }
 
 func (m *Model)DelBlogs(title string)error{
+	return nil
 }
 
 func (m *Model)AddComments(title, commtent string)error{
+	return nil
 }
 
 func (m *Model)DelComments(title string)error{
+	return nil
 }
