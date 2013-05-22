@@ -4,12 +4,24 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta http-equiv="Content-Language" content="zh-cn" />
+		<script type="text/javascript">
+			function login(){
+				var frm = document.getElementById("login_form");
+				var name = frm.username.value;
+				var psw = frm.password.value;
+				if ("" == name || "" == psw){
+					alert("username or password can not be emtpy!");
+					return false;
+				}
+				frm.submit();
+			}
+		</script>
 	</head>
 	<body>
-		<form method="POST" URL="/Index">
+		<form method="POST" URL="/Index" id="login_form">
 			suername:<input type="text" name="username"></br>
 			password:<input type="password" name="password"></br>
-			<input type="submit" value="submit">
+			<input type="button" value="submit" onclick="login();">
 		</form>
 	</body>
 </html>

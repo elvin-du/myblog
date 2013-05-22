@@ -33,6 +33,7 @@ func (c *Controller)Login(w http.ResponseWriter, r *http.Request){
 		psw := r.FormValue("password")
 		if err := CheckNamePsw(name,psw);nil != err{
 			log.Println(err)
+			http.Redirect(w,r,"/",http.StatusFound)
 			return
 		}
 		http.Redirect(w,r,"/index",http.StatusFound)

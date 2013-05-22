@@ -1,7 +1,10 @@
 package controllers
 
+import(
+	"myblog/models"
+)
 
 func CheckNamePsw(name,psw string)error{
-	
-	return nil
+	medol := models.Model{}
+	return medol.CheckNamePsw(name,psw)
 }

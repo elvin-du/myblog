@@ -19,23 +19,25 @@ type Condition struct{
 }
 
 func (m *Model)CheckNamePsw(name,psw string)error{
+	username := html.EscapeString(name)
+	password := html.EscapeString(psw)
 	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
 	if nil != err{
 		log.Print(err)
 		return err
 	}
 	defer db.Close()
-	querySql := "select 1 from myblog.users WHERE name = ' " + html.EscapeString(name) + "'"
+	querySql := "select 1 from myblog.users WHERE name = '" + username + "' AND password = '" + password + "'"
 	rows, err := db.Query(querySql)
 	if nil != err{
 		log.Print(err)
 		return err
 	}
 	if rows.Next(){
-		return errors.New("user " + name + "exsited")
+		return nil
 	}
 
-	return nil
+	return errors.New("Unkown error") 
 }
 
 func (m *Model)AddUser(name,psw string)error{
@@ -54,9 +56,8 @@ func (m *Model)AddUser(name,psw string)error{
 		return err
 	}
 	if rows.Next(){
-		return errors.New("user " + name + "exsited")
+		return errors.New("user " + username + "exsited")
 	}
-
 
 	insertSql := "INSERT myblog.users SET name=?, password=?"
 	stmt, err := db.Prepare(insertSql)

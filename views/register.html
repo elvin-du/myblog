@@ -7,8 +7,13 @@
 		<script type="text/javascript">
 			function register(){
 				var frm = document.getElementById("register_form");
+				var name = frm.username.value;
 				var password = frm.password.value;
 				var confirm_password = frm.confirm_password.value;
+				if( "" == name || "" == password || "" == confirm_password){
+					alert("username password can not be empty");	
+					return false;
+				}
 				if (password != confirm_password){
 					alert("password is not same!");
 					return false;
