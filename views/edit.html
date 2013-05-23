@@ -1,3 +1,29 @@
-{{template "header.html" .}}
+<!DOCTYPE html>
 
-{{template "footer.html" .}}
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta http-equiv="Content-Language" content="zh-cn" />
+		<script type="text/javascript">
+			function submitEdit(){
+				var frm = document.getElementById("edit_form");
+				var title = frm.title.value;
+				var context = frm.context.value;
+				if ("" == title || "" == context){
+					alert("title or context can not be emtpy!");
+					return false;
+				}
+				frm.submit();
+			}
+		</script>
+	</head>
+	<body>
+		<form method="POST" URL="/edit" id="edit_form">
+			title:</br>
+			<input type="text" name="title" size="110"></br>
+			context:</br>
+			<textarea name="context" cols="150" rows="30"></textarea></br>
+			<input type="button" value="submit" onclick="submitEdit();">
+		</form>
+	</body>
+</html>

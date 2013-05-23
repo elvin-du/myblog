@@ -86,4 +86,26 @@ func (c *Controller)Register(w http.ResponseWriter, r *http.Request){
 
 func (c *Controller)Edit(w http.ResponseWriter, r *http.Request){
 	log.Println("entered Edit()")
+	switch r.Method{
+	case "GET":
+		t,err := template.ParseFiles("views/edit.html")
+		if nil != err{
+			log.Println(err)
+			return
+		}
+		if err = t.Execute(w, nil); nil != err{
+			log.Println(err)
+			return
+		}
+	case "POST":
+		r.ParseForm()
+		title := r.FormValue("title")
+		context := r.FormValue("context")
+		log.Println("title: ", title)
+		log.Println("context: ", context)
+
+	//	model := models.Model{}
+		//model.AddUser(name,psw)
+	//	http.Redirect(w,r,"/index",http.StatusFound)
+	}
 }
