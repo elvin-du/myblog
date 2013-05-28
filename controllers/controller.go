@@ -37,6 +37,7 @@ func (c *Controller)Login(w http.ResponseWriter, r *http.Request){
 			return
 		}
 		http.Redirect(w,r,"/index",http.StatusFound)
+		SetCookie(w, CreateSessionID())
 	}
 }
 

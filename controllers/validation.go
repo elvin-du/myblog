@@ -10,7 +10,4 @@ func CheckNamePsw(name,psw string)error{
 	return medol.CheckNamePsw(name,psw)
 }
 
-func CreateSession()int{
 
-	return -1	
-}
