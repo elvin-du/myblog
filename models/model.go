@@ -3,9 +3,11 @@ package models
 import(
 	_"github.com/Go-SQL-Driver/MySQL"
 	"html"
+	"strings"
 	"log"
 	"errors"
 	"database/sql"
+	"time"
 )
 
 type Model struct{
@@ -80,14 +82,18 @@ func (m *Model)EditBlogs(newBlog string)error{
 	return nil
 }
 
-func (m *Model)AddBlogs(title,blog string)error{
+func (m *Model)AddBlogs(title,blog,blogType,username string)error{
+	title = html.EscapeString(title)
+	blog = html.EscapeString(blog)
+	blogType = html.EscapeString(blogType)
+	username = html.EscapeString(username)
 	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
 	if nil != err{
 		log.Print(err)
 		return err
 	}
 	defer db.Close()
-	querySql := "select name from myblog.blogs WHERE title = ' " + html.EscapeString(title) + "'"
+	querySql := "select 1 from myblog.blogs WHERE title = ' " + title + "'"
 	rows, err := db.Query(querySql)
 	if nil != err{
 		log.Print(err)
@@ -97,7 +103,7 @@ func (m *Model)AddBlogs(title,blog string)error{
 		return errors.New("title exsited")
 	}
 
-	insertSql := "INSERT myblog.users SET name=?, password=?"
+	insertSql := "INSERT myblog.blogs SET username =?, blogs=? , create_date=?,type_name=?,title=?"
 	stmt, err := db.Prepare(insertSql)
 	if nil != err{
 		log.Print(err)
@@ -105,7 +111,8 @@ func (m *Model)AddBlogs(title,blog string)error{
 	}
 	defer stmt.Close()
 
-//	_, err = stmt.Exec(username, password)
+	now := strings.Split(time.Now().String(), " ")[0]
+	_, err = stmt.Exec(username, blog,now,blogType,title)
 	if nil != err{
 		log.Print(err)
 		return err

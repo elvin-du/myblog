@@ -36,8 +36,8 @@ func (c *Controller)Login(w http.ResponseWriter, r *http.Request){
 			http.Redirect(w,r,"/",http.StatusFound)
 			return
 		}
+		SetCookie(w, CreateSessionID(name))
 		http.Redirect(w,r,"/index",http.StatusFound)
-		SetCookie(w, CreateSessionID())
 	}
 }
 
@@ -87,6 +87,12 @@ func (c *Controller)Register(w http.ResponseWriter, r *http.Request){
 
 func (c *Controller)Edit(w http.ResponseWriter, r *http.Request){
 	log.Println("entered Edit()")
+	name,err :=CheckCookie(r) 
+	if err != nil{
+		log.Println(err)
+		http.Redirect(w,r,"/", http.StatusFound)
+		return
+	}
 	switch r.Method{
 	case "GET":
 		t,err := template.ParseFiles("views/edit.html")
@@ -105,8 +111,10 @@ func (c *Controller)Edit(w http.ResponseWriter, r *http.Request){
 		log.Println("title: ", title)
 		log.Println("context: ", context)
 
-	//	model := models.Model{}
-		//model.AddUser(name,psw)
-	//	http.Redirect(w,r,"/index",http.StatusFound)
+		model := models.Model{}
+		model.AddBlogs(title,context,"",name)
+		http.Redirect(w,r,"/index",http.StatusFound)
 	}
 }
+
+
