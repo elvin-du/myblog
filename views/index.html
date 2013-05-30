@@ -27,7 +27,16 @@
 			</div>
 			
 			<div id="content">
-				Content goes here
+				{{range .Blg}}
+				<div style="">
+					<h2>
+					{{.Title}}
+					</h2>
+				</div>
+				<div>
+					{{.Blogs}}
+				</div>
+				{{end}}
 			</div>
 
 			<div id="comment">

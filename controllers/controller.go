@@ -50,7 +50,20 @@ func (c *Controller)Index(w http.ResponseWriter, r *http.Request){
 			log.Println(err)
 			return
 		}
-		if err = t.Execute(w, nil); nil != err{
+		username,err := CheckCookie(r)
+		cond := models.Condition{"byName",username}
+		model := models.Model{}
+		err, blogsSlice := model.QueryBlogs(cond)
+		if nil != err{
+			log.Println(err)
+			return
+		}
+		log.Println(blogsSlice)
+		type tmp struct{
+			Blg []models.Blogs
+		}
+		blg := tmp{blogsSlice}
+		if err = t.Execute(w, blg); nil != err{
 			log.Println(err)
 			return
 		}
@@ -87,7 +100,7 @@ func (c *Controller)Register(w http.ResponseWriter, r *http.Request){
 
 func (c *Controller)Edit(w http.ResponseWriter, r *http.Request){
 	log.Println("entered Edit()")
-	name,err :=CheckCookie(r) 
+	name,err :=CheckCookie(r)
 	if err != nil{
 		log.Println(err)
 		http.Redirect(w,r,"/", http.StatusFound)
@@ -107,14 +120,12 @@ func (c *Controller)Edit(w http.ResponseWriter, r *http.Request){
 	case "POST":
 		r.ParseForm()
 		title := r.FormValue("title")
-		context := r.FormValue("context")
+		content := r.FormValue("content")
 		log.Println("title: ", title)
-		log.Println("context: ", context)
+		log.Println("content: ", content)
 
 		model := models.Model{}
-		model.AddBlogs(title,context,"",name)
+		model.AddBlogs(title,content,"",name)
 		http.Redirect(w,r,"/index",http.StatusFound)
 	}
 }
-
-

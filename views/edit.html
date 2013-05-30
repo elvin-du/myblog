@@ -8,9 +8,9 @@
 			function submitEdit(){
 				var frm = document.getElementById("edit_form");
 				var title = frm.title.value;
-				var context = frm.context.value;
-				if ("" == title || "" == context){
-					alert("title or context can not be emtpy!");
+				var content = frm.content.value;
+				if ("" == title || "" == content ){
+					alert("title or content can not be emtpy!");
 					return false;
 				}
 				frm.submit();
@@ -22,7 +22,7 @@
 			title:</br>
 			<input type="text" name="title" size="110"></br>
 			context:</br>
-			<textarea name="context" cols="150" rows="30"></textarea></br>
+			<textarea name="content" cols="150" rows="30"></textarea></br>
 			<input type="button" value="submit" onclick="submitEdit();">
 		</form>
 	</body>

@@ -14,10 +14,17 @@ type Model struct{
 }
 
 type Condition struct{
-	con_type string //VALUE:"byDate","byTypeID","byTitle"
-	date string //which year
-	title string
-	type_id int
+	CondType string //VALUE:"byDate","byType","byTitle","byName"
+	Content interface{}//example of date:"2012-11-1"
+}
+
+type Blogs struct{
+	Id				int
+	Username		string
+	Blogs			string
+	CreateDate		string
+	TypeName		string
+	Title			string
 }
 
 func (m *Model)CheckNamePsw(name,psw string)error{
@@ -122,38 +129,49 @@ func (m *Model)AddBlogs(title,blog,blogType,username string)error{
 }
 
 //query condition perhaps change,so agument type is interface
-func (m *Model)QueryBlogs(condition interface{})error{
+func (m *Model)QueryBlogs(cond Condition)(err error,blogsSlice []Blogs){
 	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
 	if nil != err{
 		log.Print(err)
-		return err
+		return
 	}
 	defer db.Close()
-	querySql := "select name from myblog.blogs WHERE title = ' " //+ html.EscapeString(title) + "'"
+
+	querySql := "select * from myblog.blogs WHERE "//title = ' " //+ html.EscapeString(title) + "'"
+	switch cond.CondType{
+	case "byDate":
+		date := cond.Content.(string)
+		querySql += "create_date = '" + date + "'"
+	case "byType":
+		typeName := cond.Content.(string)
+		querySql += "type_name = '" + typeName + "'"
+	case "byTitle":
+		title := cond.Content.(string)
+		querySql += "title = '" + title+ "'"
+	case "byName":
+		name := cond.Content.(string)
+		querySql += "username= '" + name + "'"
+	}
+
 	rows, err := db.Query(querySql)
 	if nil != err{
 		log.Print(err)
-		return err
-	}
-	if rows.Next(){
-		return errors.New("title exsited")
+		return
 	}
 
-	insertSql := "INSERT myblog.users SET name=?, password=?"
-	stmt, err := db.Prepare(insertSql)
-	if nil != err{
-		log.Print(err)
-		return err
-	}
-	defer stmt.Close()
-
-	//_, err = stmt.Exec(username, password)
-	if nil != err{
-		log.Print(err)
-		return err
+	flag := false
+	for rows.Next(){
+		flag = true
+		var id int
+		var username,blogs,createDate,typeName,title string
+		rows.Scan(&id,&username,&blogs,&createDate,&typeName,&title)
+		blogsSlice = append(blogsSlice,Blogs{id,username,blogs,createDate,typeName,title})
 	}
 
-	return nil
+	if !flag{
+		err = errors.New("not found")
+	}
+	return
 }
 
 func (m *Model)DelBlogs(title string)error{
