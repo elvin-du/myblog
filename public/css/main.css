@@ -13,45 +13,18 @@ div#header h1{
 	margin:-5px;
 	padding:40px;
 }
-div#menu {
-	border-style:none none none none;
-	border-width:1px;
-	border-color:gray;
-	width:20%;
+div#content{
+	width:60%;
 	float:left;
+	padding-left:60px;
 }
-div#content {
+div#content h1{
 	background-color:#EEEEEE;
-	width:50%;
-	float:left;
 }
-div#comment{
+div#classification_menu{
 	border-style:none none none none;
 	border-width:2px;
 	border-color:blue;
-	width:20%;
+	width:25%;
 	float:left;
 }
-#navigation{
-	margin:0;
-	float:left;
-	width:100%;
-	padding:5px;
-	list-style-type:none;
-}
-#navigation a{
-	float:left;
-	width:7em;
-	text-decoration:none;
-	color:white;
-	background-color:purple;
-	padding:0.2em 0.6em;
-	border-right:1px solid white;
-}
-#navigation li{
-	display:inline;
-}
-#navigation a:hover{
-	background-color:#ff3300
-}
-

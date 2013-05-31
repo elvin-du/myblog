@@ -10,40 +10,19 @@
 			<div id="header">
 				<h1>杜满想的blog.唯有自律，方能自由！</h1>
 			</div>
-				<ul id="navigation">
-					<li><a href="#">linux</a></li>
-					<li><a href="#">vim</a></li>
-					<li><a href="#">windows</a></li>
-					<li><a href="#">glang</a></li>
-					<li><a href="#">life</a></li>
-					<li><a href="#">c++</a></li>
-				</ul>
-			<div id="menu">
-				<ul>
-					<li>HTML</li>
-					<li>CSS</li>
-					<li>JavaScript</li>
-				</ul>
-			</div>
-			
 			<div id="content">
 				{{range .Blg}}
 				<div style="">
-					<h2>
-					{{.Title}}
-					</h2>
+					<h1><a href="#">{{.Title}}</a></h1>
 				</div>
-				<div>
-					{{.Blogs}}
-				</div>
+				<div>{{.Blogs}}</div>
 				{{end}}
 			</div>
-
-			<div id="comment">
+			<div id="classification_menu">
 				<ul>
-					<li><a href="#">HTML</a></li>
-					<li>CSS</li>
-					<li>JavaScript</li>
+					{{range .BlgTp}}
+					<li><a href="{{.BlogType}}">{{.BlogType}}</a></li>
+					{{end}}
 				</ul>
 			</div>
 		</div>

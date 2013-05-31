@@ -27,6 +27,11 @@ type Blogs struct{
 	Title			string
 }
 
+type BlogType struct{
+	Id			int
+	BlogType	string
+}
+
 func (m *Model)CheckNamePsw(name,psw string)error{
 	username := html.EscapeString(name)
 	password := html.EscapeString(psw)
@@ -126,6 +131,34 @@ func (m *Model)AddBlogs(title,blog,blogType,username string)error{
 	}
 
 	return nil
+}
+
+func (m *Model)QueryBlogType()(err error,blgType []BlogType){
+	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
+	if nil != err{
+		log.Print(err)
+		return
+	}
+	defer db.Close()
+	querySql := "select * from myblog.blog_type"
+	rows, err := db.Query(querySql)
+	if nil != err{
+		log.Print(err)
+		return
+	}
+
+	flag := false
+	for rows.Next(){
+		flag = true
+		var id int
+		var blgTp string
+		rows.Scan(&id,&blgTp)
+		blgType = append(blgType,BlogType{id,blgTp})
+	}
+	if !flag{
+		err = errors.New("not found")
+	}
+	return
 }
 
 //query condition perhaps change,so agument type is interface

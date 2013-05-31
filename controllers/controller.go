@@ -43,6 +43,12 @@ func (c *Controller)Login(w http.ResponseWriter, r *http.Request){
 
 func (c *Controller)Index(w http.ResponseWriter, r *http.Request){
 	log.Println("entered Index()")
+	username,err := CheckCookie(r)
+	if err != nil{
+		log.Println(err)
+		http.Redirect(w,r,"/", http.StatusFound)
+		return
+	}
 	switch r.Method{
 	case "GET":
 		t,err := template.ParseFiles("views/index.html")
@@ -50,7 +56,6 @@ func (c *Controller)Index(w http.ResponseWriter, r *http.Request){
 			log.Println(err)
 			return
 		}
-		username,err := CheckCookie(r)
 		cond := models.Condition{"byName",username}
 		model := models.Model{}
 		err, blogsSlice := model.QueryBlogs(cond)
@@ -58,11 +63,17 @@ func (c *Controller)Index(w http.ResponseWriter, r *http.Request){
 			log.Println(err)
 			return
 		}
-		log.Println(blogsSlice)
-		type tmp struct{
-			Blg []models.Blogs
+		err, blgTpSlice := model.QueryBlogType()
+		if nil != err{
+			log.Println(err)
+			return
 		}
-		blg := tmp{blogsSlice}
+		type tmp struct{
+			Blg			[]models.Blogs
+			BlgTp		[]models.BlogType
+		}
+
+		blg := tmp{blogsSlice, blgTpSlice}
 		if err = t.Execute(w, blg); nil != err{
 			log.Println(err)
 			return
