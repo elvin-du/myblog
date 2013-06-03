@@ -12,16 +12,17 @@
 			</div>
 			<div id="content">
 				{{range .Blg}}
-				<div style="">
-					<h1><a href="#">{{.Title}}</a></h1>
+				<div>
+					<h1><a href="articles/{{.Title}}">{{.Title}}</a></h1>
 				</div>
 				<div>{{.Blogs}}</div>
 				{{end}}
 			</div>
-			<div id="classification_menu">
+			<div id="tag_menu">
+				<div><h1>标签</h1></div>
 				<ul>
 					{{range .BlgTp}}
-					<li><a href="{{.BlogType}}">{{.BlogType}}</a></li>
+					<li><a href="tag/{{.BlogType}}">{{.BlogType}}</a></li>
 					{{end}}
 				</ul>
 			</div>

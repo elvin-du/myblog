@@ -1,5 +1,7 @@
 body{
-	margin:0;
+	margin:30px 100px 30px 100px;
+	border:5px solid Gainsboro;
+	border-radius:10px;
 	padding:0;
 }
 div#container{
@@ -10,21 +12,32 @@ div#header {
 	background-color:#99bbbb;
 }
 div#header h1{
-	margin:-5px;
+	margin:0;
 	padding:40px;
 }
 div#content{
-	width:60%;
+	width:65%;
 	float:left;
-	padding-left:60px;
+	margin:0px 20px 30px 60px;
+}
+div#content div{
+	margin:0px 0px 0px 0px;
 }
 div#content h1{
-	background-color:#EEEEEE;
+	background-color:Gainsboro;
 }
-div#classification_menu{
-	border-style:none none none none;
-	border-width:2px;
-	border-color:blue;
-	width:25%;
+div#tag_menu{
+	margin:25px 20px 30px 20px;
+	border:5px solid Gainsboro;
+	border-radius:10px;
+	width:20%;
 	float:left;
+}
+div#tag_menu div h1{
+	margin:0 0 0 0;
+	padding-top:5px;
+	padding-left:20px;
+}
+div#tag_menu ul{
+	list-style-image:url('/public/images/arrow.gif')
 }

@@ -16,12 +16,20 @@
 				frm.submit();
 			}
 		</script>
+		<style type="text/css">
+			body{
+				margin:30px 50px 30px 50px;
+			}
+		</style>
 	</head>
 	<body>
 		<form method="POST" URL="/edit" id="edit_form">
-			title:</br>
+			标题:</br>
+			<select name="arcticle_tag">
+				<option value="{{.Tag}}">{{.Tag}}</option>
+			</select>
 			<input type="text" name="title" size="110"></br>
-			context:</br>
+			内容:</br>
 			<textarea name="content" cols="150" rows="30"></textarea></br>
 			<input type="button" value="submit" onclick="submitEdit();">
 		</form>
