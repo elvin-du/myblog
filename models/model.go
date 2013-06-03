@@ -14,17 +14,18 @@ type Model struct{
 }
 
 type Condition struct{
-	CondType string //VALUE:"byDate","byType","byTitle","byName"
+	CondType string //VALUE:"byDate","byType","byTitle","byUser"
 	Content interface{}//example of date:"2012-11-1"
 }
 
 type Blogs struct{
 	Id				int
-	Username		string
 	Blogs			string
 	CreateDate		string
 	TypeName		string
+	TypeId			int
 	Title			string
+	TitleId			int
 }
 
 type BlogType struct{
@@ -105,18 +106,20 @@ func (m *Model)AddBlogs(title,blog,blogType,username string)error{
 		return err
 	}
 	defer db.Close()
-	querySql := "select 1 from myblog.blogs WHERE title = ' " + title + "'"
-	rows, err := db.Query(querySql)
+
+	sql := "INSERT myblog.title SET title=?"
+	stmt,err := db.Prepare(sql)
 	if nil != err{
-		log.Print(err)
-		return err
+		log.Println(err)
 	}
-	if rows.Next(){
-		return errors.New("title exsited")
+	defer stmt.Close()
+	_,err = stmt.Exec(title)
+	if nil != err{
+		log.Println(err)
 	}
 
-	insertSql := "INSERT myblog.blogs SET username =?, blogs=? , create_date=?,type_name=?,title=?"
-	stmt, err := db.Prepare(insertSql)
+	insertSql := "INSERT myblog.blogs SET user_id =?, blogs=? , create_date=?,type_id=?,title_id=?"
+	stmt, err = db.Prepare(insertSql)
 	if nil != err{
 		log.Print(err)
 		return err
@@ -124,13 +127,52 @@ func (m *Model)AddBlogs(title,blog,blogType,username string)error{
 	defer stmt.Close()
 
 	now := strings.Split(time.Now().String(), " ")[0]
-	_, err = stmt.Exec(username, blog,now,blogType,title)
+	titleId, typeId,userId := GetId(title,blogType,username)
+	_, err = stmt.Exec(userId, blog,now, typeId, titleId)
 	if nil != err{
 		log.Print(err)
 		return err
 	}
 
 	return nil
+}
+
+func GetId(title,blogType,username string)(titleId,typeId,userId int64){
+	title = html.EscapeString(title)
+	blogType = html.EscapeString(blogType)
+	username = html.EscapeString(username)
+	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
+	if nil != err{
+		log.Print(err)
+	}
+	defer db.Close()
+	sql := `SELECT id FROM myblog.title WHERE title = '` + title + `'`
+	rows , err := db.Query(sql)
+	if nil != err{
+		log.Print(err)
+	}
+	for rows.Next(){
+		rows.Scan(&titleId)
+	}
+
+	sql = `SELECT id FROM myblog.blog_type WHERE blog_type = '` + blogType + `'`
+	rows , err = db.Query(sql)
+	if nil != err{
+		log.Print(err)
+	}
+	for rows.Next(){
+		rows.Scan(&typeId)
+	}
+
+	sql = `SELECT userid FROM myblog.users WHERE name = '` + username+ `'`
+	rows , err = db.Query(sql)
+	if nil != err{
+		log.Print(err)
+	}
+	for rows.Next(){
+		rows.Scan(&userId)
+	}
+	return
 }
 
 func (m *Model)QueryBlogType()(err error,blgType []BlogType){
@@ -170,39 +212,28 @@ func (m *Model)QueryBlogs(cond Condition)(err error,blogsSlice []Blogs){
 	}
 	defer db.Close()
 
-	querySql := "select * from myblog.blogs WHERE "//title = ' " //+ html.EscapeString(title) + "'"
+	sql := `SELECT a.id,a.blogs,a.create_date, a.title_id,b.title, a.type_id, d.blog_type FROM myblog.blogs a, myblog.title b,myblog.users c, myblog.blog_type d WHERE `
 	switch cond.CondType{
 	case "byDate":
-		date := cond.Content.(string)
-		querySql += "create_date = '" + date + "'"
-	case "byType":
-		typeName := cond.Content.(string)
-		querySql += "type_name = '" + typeName + "'"
+		sql += `a.user_id = c.userid and a.type_id = d.id AND a.title_id = b.id AND a.create_date= '` + cond.Content.(string) + `'`
 	case "byTitle":
-		title := cond.Content.(string)
-		querySql += "title = '" + title+ "'"
+		sql += `a.user_id = c.userid and a.type_id = d.id AND a.title_id = b.id AND b.title= '` + cond.Content.(string) + `'`
+	case "byType":
+		sql += `a.user_id = c.userid and a.type_id = d.id AND a.title_id = b.id AND d.blog_type = '` + cond.Content.(string) + `'`
 	case "byName":
-		name := cond.Content.(string)
-		querySql += "username= '" + name + "'"
+		sql += `a.user_id = c.userid and a.type_id = d.id AND a.title_id = b.id AND c.name = '` + cond.Content.(string) + `'`
 	}
-
-	rows, err := db.Query(querySql)
+	log.Println("sql: ", sql)
+	rows, err := db.Query(sql)
 	if nil != err{
 		log.Print(err)
-		return
 	}
 
-	flag := false
 	for rows.Next(){
-		flag = true
-		var id int
-		var username,blogs,createDate,typeName,title string
-		rows.Scan(&id,&username,&blogs,&createDate,&typeName,&title)
-		blogsSlice = append(blogsSlice,Blogs{id,username,blogs,createDate,typeName,title})
-	}
-
-	if !flag{
-		err = errors.New("not found")
+		var id ,titleId, typeId int
+		var blogs,createDate, title, blogType string
+		rows.Scan(&id, &blogs, &createDate, &titleId,&title, &typeId, &blogType)
+		blogsSlice = append(blogsSlice,Blogs{id,blogs,createDate,blogType,typeId,title,titleId})
 	}
 	return
 }

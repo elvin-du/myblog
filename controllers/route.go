@@ -26,5 +26,9 @@ func Register(w http.ResponseWriter, r *http.Request){
 		ctrl.Edit(w,r)
 	case "/index" == urlPath:
 		ctrl.Index(w,r)
+	case strings.HasPrefix(urlPath, "/articles"):
+		ctrl.Articles(w,r)
+	case strings.HasPrefix(urlPath, "/tags"):
+		ctrl.Tags(w,r)
 	}
 }

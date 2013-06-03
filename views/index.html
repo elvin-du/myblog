@@ -13,7 +13,7 @@
 			<div id="content">
 				{{range .Blg}}
 				<div>
-					<h1><a href="articles/{{.Title}}">{{.Title}}</a></h1>
+					<h1><a href="/articles/{{.Id}}">{{.Title}}</a></h1>
 				</div>
 				<div>{{.Blogs}}</div>
 				{{end}}
@@ -22,7 +22,7 @@
 				<div><h1>标签</h1></div>
 				<ul>
 					{{range .BlgTp}}
-					<li><a href="tag/{{.BlogType}}">{{.BlogType}}</a></li>
+					<li><a href="/tags/{{.Id}}">{{.BlogType}}</a></li>
 					{{end}}
 				</ul>
 			</div>
