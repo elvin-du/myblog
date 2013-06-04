@@ -168,7 +168,7 @@ func (c *Controller)Articles(w http.ResponseWriter, r *http.Request){
 		err, blogsSlice := model.QueryBlogs(cond)
 		if nil != err{
 			log.Println(err)
-			return
+			blogsSlice = append(blogsSlice, models.Blogs{Blogs:"no article"})
 		}
 		err, blgTpSlice := model.QueryBlogType()
 		if nil != err{
@@ -206,7 +206,7 @@ func (c *Controller)Tags(w http.ResponseWriter, r *http.Request){
 		err, blogsSlice := model.QueryBlogs(cond)
 		if nil != err{
 			log.Println(err)
-			return
+			blogsSlice = append(blogsSlice, models.Blogs{Blogs:"no article"})
 		}
 		err, blgTpSlice := model.QueryBlogType()
 		if nil != err{

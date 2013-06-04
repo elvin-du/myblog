@@ -217,9 +217,9 @@ func (m *Model)QueryBlogs(cond Condition)(err error,blogsSlice []Blogs){
 	case "byDate":
 		sql += `a.user_id = c.userid and a.type_id = d.id AND a.title_id = b.id AND a.create_date= '` + cond.Content.(string) + `'`
 	case "byTitle":
-		sql += `a.user_id = c.userid and a.type_id = d.id AND a.title_id = b.id AND b.title= '` + cond.Content.(string) + `'`
+		sql += `a.user_id = c.userid and a.type_id = d.id AND a.title_id = b.id AND b.id= '` + cond.Content.(string) + `'`
 	case "byType":
-		sql += `a.user_id = c.userid and a.type_id = d.id AND a.title_id = b.id AND d.blog_type = '` + cond.Content.(string) + `'`
+		sql += `a.user_id = c.userid and a.type_id = d.id AND a.title_id = b.id AND d.id = '` + cond.Content.(string) + `'`
 	case "byName":
 		sql += `a.user_id = c.userid and a.type_id = d.id AND a.title_id = b.id AND c.name = '` + cond.Content.(string) + `'`
 	}
@@ -234,6 +234,10 @@ func (m *Model)QueryBlogs(cond Condition)(err error,blogsSlice []Blogs){
 		var blogs,createDate, title, blogType string
 		rows.Scan(&id, &blogs, &createDate, &titleId,&title, &typeId, &blogType)
 		blogsSlice = append(blogsSlice,Blogs{id,blogs,createDate,blogType,typeId,title,titleId})
+	}
+	log.Println("blogsSlice:", blogsSlice)
+	if 0 ==  len(blogsSlice){
+		err = errors.New("not found")
 	}
 	return
 }
