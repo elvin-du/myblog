@@ -5,6 +5,7 @@ import(
 	"log"
 	"html/template"
 	"myblog/models"
+	"strconv"
 )
 
 type Controller struct{
@@ -43,12 +44,11 @@ func (c *Controller)Login(w http.ResponseWriter, r *http.Request){
 
 func (c *Controller)Index(w http.ResponseWriter, r *http.Request){
 	log.Println("entered Index()")
-	username,err := CheckCookie(r)
-	if err != nil{
-		log.Println(err)
-		http.Redirect(w,r,"/", http.StatusFound)
-		return
-	}
+	//username,err := CheckCookie(r)
+	//if err != nil{
+	//	log.Println(err)
+		//http.Redirect(w,r,"/", http.StatusFound)
+//	}
 	switch r.Method{
 	case "GET":
 		t,err := template.ParseFiles("views/index.html")
@@ -56,24 +56,23 @@ func (c *Controller)Index(w http.ResponseWriter, r *http.Request){
 			log.Println(err)
 			return
 		}
-		cond := models.Condition{"byName",username}
 		model := models.Model{}
-		err, blogsSlice := model.QueryBlogs(cond)
+		err, blogs:= model.QueryBlogs()
 		if nil != err{
 			log.Println(err)
-			blogsSlice = append(blogsSlice, models.Blogs{Blogs:"no article"})
+			blogs = append(blogs, models.Blog{Content:"no article"})
 		}
-		err, blgTpSlice := model.QueryBlogType()
+		err, tags:= model.QueryTags()
 		if nil != err{
 			log.Println(err)
 		}
 		type tmp struct{
-			Blg			[]models.Blogs
-			BlgTp		[]models.BlogType
+			Blgs		[]models.Blog
+			Tags		[]models.Tag
 		}
 
-		blg := tmp{blogsSlice, blgTpSlice}
-		if err = t.Execute(w, blg); nil != err{
+		tmp2 := tmp{blogs, tags}
+		if err = t.Execute(w, tmp2); nil != err{
 			log.Println(err)
 			return
 		}
@@ -110,12 +109,12 @@ func (c *Controller)Register(w http.ResponseWriter, r *http.Request){
 
 func (c *Controller)Edit(w http.ResponseWriter, r *http.Request){
 	log.Println("entered Edit()")
-	name,err :=CheckCookie(r)
-	if err != nil{
-		log.Println(err)
-		http.Redirect(w,r,"/", http.StatusFound)
-		return
-	}
+	//name,err :=CheckCookie(r)
+	//if err != nil{
+	//	log.Println(err)
+	//	http.Redirect(w,r,"/", http.StatusFound)
+	//	return
+//	}
 	switch r.Method{
 	case "GET":
 		t,err := template.ParseFiles("views/edit.html")
@@ -124,15 +123,15 @@ func (c *Controller)Edit(w http.ResponseWriter, r *http.Request){
 			return
 		}
 		m := models.Model{}
-		err,blogTp := m.QueryBlogType()
+		err, tags:= m.QueryTags()
 		if nil != err{
 			log.Println(err)
 		}
 		type tmp struct{
-			BlogTp []models.BlogType
+			Tags []models.Tag
 		}
-		bt := tmp{blogTp}
-		if err = t.Execute(w, bt); nil != err{
+		tmp2 := tmp{tags}
+		if err = t.Execute(w, tmp2); nil != err{
 			log.Println(err)
 			return
 		}
@@ -140,13 +139,14 @@ func (c *Controller)Edit(w http.ResponseWriter, r *http.Request){
 		r.ParseForm()
 		title := r.FormValue("title")
 		content := r.FormValue("content")
-		arcticleTag := r.FormValue("arcticle_tag")
+		tag := r.FormValue("arcticle_tag")
+		tagId, _ := strconv.Atoi(tag)
 		//log.Println("title: ", title)
 		//log.Println("content: ", content)
 		//log.Println("arcticleTag: ", arcticleTag)
 
 		model := models.Model{}
-		model.AddBlogs(title,content,arcticleTag,name)
+		model.AddBlog(title,content,tagId)
 		http.Redirect(w,r,"/index",http.StatusFound)
 	}
 }
@@ -156,32 +156,31 @@ func (c *Controller)Articles(w http.ResponseWriter, r *http.Request){
 	r.ParseForm()
 	switch r.Method{
 	case "GET":
+		strBlogId := r.URL.String()[10:]
+		blogId,_ := strconv.Atoi(strBlogId)
+		log.Println("title:", blogId)
+		model := models.Model{}
+		err, blog := model.QueryByTitle(blogId)
+		if nil != err{
+			log.Println(err)
+		}
+		err, tags := model.QueryTags()
+		if nil != err{
+			log.Println(err)
+		}
+
+		type tmp struct{
+			Blg		models.Blog
+			Tags	[]models.Tag
+		}
+		tmp2 := tmp{blog, tags}
+
 		t,err := template.ParseFiles("views/index.html")
 		if nil != err{
 			log.Println(err)
 			return
 		}
-		title := r.URL.String()[10:]
-		log.Println("title:", title)
-		cond := models.Condition{"byTitle",title}
-		model := models.Model{}
-		err, blogsSlice := model.QueryBlogs(cond)
-		if nil != err{
-			log.Println(err)
-			blogsSlice = append(blogsSlice, models.Blogs{Blogs:"no article"})
-		}
-		err, blgTpSlice := model.QueryBlogType()
-		if nil != err{
-			log.Println(err)
-			return
-		}
-		type tmp struct{
-			Blg			[]models.Blogs
-			BlgTp		[]models.BlogType
-		}
-
-		blg := tmp{blogsSlice, blgTpSlice}
-		if err = t.Execute(w, blg); nil != err{
+		if err = t.Execute(w, tmp2); nil != err{
 			log.Println(err)
 			return
 		}
@@ -192,34 +191,33 @@ func (c *Controller)Articles(w http.ResponseWriter, r *http.Request){
 func (c *Controller)Tags(w http.ResponseWriter, r *http.Request){
 	log.Println("entered Tags()")
 	r.ParseForm()
-		switch r.Method{
+	switch r.Method{
 	case "GET":
+		strTagId := r.URL.String()[6:]
+		tagId,_ := strconv.Atoi(strTagId)
+		log.Println("tagId:", tagId)
+		model := models.Model{}
+		err, blgs := model.QueryByTag(tagId)
+		if nil != err{
+			log.Println(err)
+			blgs = append(blgs, models.Blog{Title:"no article"})
+		}
+		err, tags:= model.QueryTags()
+		if nil != err{
+			log.Println(err)
+		}
+
+		type tmp struct{
+			Blgs	[]models.Blog
+			Tags	[]models.Tag
+		}
+		tmp2 := tmp{blgs, tags}
 		t,err := template.ParseFiles("views/index.html")
 		if nil != err{
 			log.Println(err)
 			return
 		}
-		tag := r.URL.String()[6:]
-		log.Println("tag:", tag)
-		cond := models.Condition{"byType",tag}
-		model := models.Model{}
-		err, blogsSlice := model.QueryBlogs(cond)
-		if nil != err{
-			log.Println(err)
-			blogsSlice = append(blogsSlice, models.Blogs{Blogs:"no article"})
-		}
-		err, blgTpSlice := model.QueryBlogType()
-		if nil != err{
-			log.Println(err)
-			return
-		}
-		type tmp struct{
-			Blg			[]models.Blogs
-			BlgTp		[]models.BlogType
-		}
-
-		blg := tmp{blogsSlice, blgTpSlice}
-		if err = t.Execute(w, blg); nil != err{
+		if err = t.Execute(w, tmp2); nil != err{
 			log.Println(err)
 			return
 		}

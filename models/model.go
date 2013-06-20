@@ -13,24 +13,26 @@ import(
 type Model struct{
 }
 
-type Condition struct{
-	CondType string //VALUE:"byDate","byType","byTitle","byUser"
-	Content interface{}//example of date:"2012-11-1"
-}
-
-type Blogs struct{
+type Blog struct{
 	Id				int
-	Blogs			string
-	CreateDate		string
-	TypeName		string
-	TypeId			int
+	Content			string
 	Title			string
-	TitleId			int
+	CreateDate		string
+	TagId			int
+	Comments		[]Comment
 }
 
-type BlogType struct{
+type Comment struct{
 	Id			int
-	BlogType	string
+	IP			string
+	Content		string
+	CreateDate	string
+	BlogId		int
+}
+
+type Tag struct{
+	Id			int
+	Tag			string
 }
 
 func (m *Model)CheckNamePsw(name,psw string)error{
@@ -91,52 +93,6 @@ func (m *Model)AddUser(name,psw string)error{
 	return nil
 }
 
-func (m *Model)EditBlogs(newBlog string)error{
-	return nil
-}
-
-func (m *Model)AddBlogs(title,blog,blogType,username string)error{
-	title = html.EscapeString(title)
-	blog = html.EscapeString(blog)
-	blogType = html.EscapeString(blogType)
-	username = html.EscapeString(username)
-	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
-	if nil != err{
-		log.Print(err)
-		return err
-	}
-	defer db.Close()
-
-	sql := "INSERT myblog.title SET title=?"
-	stmt,err := db.Prepare(sql)
-	if nil != err{
-		log.Println(err)
-	}
-	defer stmt.Close()
-	_,err = stmt.Exec(title)
-	if nil != err{
-		log.Println(err)
-	}
-
-	insertSql := "INSERT myblog.blogs SET user_id =?, blogs=? , create_date=?,type_id=?,title_id=?"
-	stmt, err = db.Prepare(insertSql)
-	if nil != err{
-		log.Print(err)
-		return err
-	}
-	defer stmt.Close()
-
-	now := strings.Split(time.Now().String(), " ")[0]
-	titleId, typeId,userId := GetId(title,blogType,username)
-	_, err = stmt.Exec(userId, blog,now, typeId, titleId)
-	if nil != err{
-		log.Print(err)
-		return err
-	}
-
-	return nil
-}
-
 func GetId(title,blogType,username string)(titleId,typeId,userId int64){
 	title = html.EscapeString(title)
 	blogType = html.EscapeString(blogType)
@@ -175,14 +131,81 @@ func GetId(title,blogType,username string)(titleId,typeId,userId int64){
 	return
 }
 
-func (m *Model)QueryBlogType()(err error,blgType []BlogType){
+func (m *Model)AddBlog(title, content string, tagId int)error{
+	title = html.EscapeString(title)
+	content = html.EscapeString(content)
+	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
+	if nil != err{
+		log.Print(err)
+		return err
+	}
+	defer db.Close()
+
+	insertSql := "INSERT myblog.blogs SET content=?, title=?, create_date=?, tag_id=?"
+	stmt, err := db.Prepare(insertSql)
+	if nil != err{
+		log.Print(err)
+		return err
+	}
+	defer stmt.Close()
+
+	now := strings.Split(time.Now().String(), " ")[0]
+	_, err = stmt.Exec(content, title, now, tagId)
+	if nil != err{
+		log.Print(err)
+		return err
+	}
+
+	return nil
+}
+
+//query all blogs
+func (m *Model)QueryBlogs()(err error,blogs []Blog){
 	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
 	if nil != err{
 		log.Print(err)
 		return
 	}
 	defer db.Close()
-	querySql := "select * from myblog.blog_type"
+
+	sql := `SELECT * FROM myblog.blogs`
+	rows, err := db.Query(sql)
+	if nil != err{
+		log.Print(err)
+	}
+
+	for rows.Next(){
+		var id, tagId int
+		var content, title, createDate string
+		rows.Scan(&id, &content, &title, &createDate, &tagId)
+		blogs = append(blogs,Blog{Id:id, Content:content,Title:title, CreateDate:createDate,TagId:tagId})
+	}
+	log.Println("blogsSlice:", blogs)
+	if 0 ==  len(blogs){
+		err = errors.New("not found")
+	}
+	return
+}
+
+func (m *Model)QueryByTitle(blogId int)(err error, blog Blog){
+	//TODO
+	return
+}
+
+func (m *Model)QueryByTag(tagId int)(err error, blogs []Blog){
+	//TODO
+	return
+}
+
+//query all tags name
+func (m *Model)QueryTags()(err error,tags []Tag){
+	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
+	if nil != err{
+		log.Print(err)
+		return
+	}
+	defer db.Close()
+	querySql := "select * from myblog.tags"
 	rows, err := db.Query(querySql)
 	if nil != err{
 		log.Print(err)
@@ -193,9 +216,9 @@ func (m *Model)QueryBlogType()(err error,blgType []BlogType){
 	for rows.Next(){
 		flag = true
 		var id int
-		var blgTp string
-		rows.Scan(&id,&blgTp)
-		blgType = append(blgType,BlogType{id,blgTp})
+		var tag string
+		rows.Scan(&id,&tag)
+		tags = append(tags, Tag{id,tag})
 	}
 	if !flag{
 		err = errors.New("not found")
@@ -203,53 +226,22 @@ func (m *Model)QueryBlogType()(err error,blgType []BlogType){
 	return
 }
 
-//query condition perhaps change,so agument type is interface
-func (m *Model)QueryBlogs(cond Condition)(err error,blogsSlice []Blogs){
-	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
-	if nil != err{
-		log.Print(err)
-		return
-	}
-	defer db.Close()
-
-	sql := `SELECT a.id,a.blogs,a.create_date, a.title_id,b.title, a.type_id, d.blog_type FROM myblog.blogs a, myblog.title b,myblog.users c, myblog.blog_type d WHERE `
-	switch cond.CondType{
-	case "byDate":
-		sql += `a.user_id = c.userid and a.type_id = d.id AND a.title_id = b.id AND a.create_date= '` + cond.Content.(string) + `'`
-	case "byTitle":
-		sql += `a.user_id = c.userid and a.type_id = d.id AND a.title_id = b.id AND b.id= '` + cond.Content.(string) + `'`
-	case "byType":
-		sql += `a.user_id = c.userid and a.type_id = d.id AND a.title_id = b.id AND d.id = '` + cond.Content.(string) + `'`
-	case "byName":
-		sql += `a.user_id = c.userid and a.type_id = d.id AND a.title_id = b.id AND c.name = '` + cond.Content.(string) + `'`
-	}
-	log.Println("sql: ", sql)
-	rows, err := db.Query(sql)
-	if nil != err{
-		log.Print(err)
-	}
-
-	for rows.Next(){
-		var id ,titleId, typeId int
-		var blogs,createDate, title, blogType string
-		rows.Scan(&id, &blogs, &createDate, &titleId,&title, &typeId, &blogType)
-		blogsSlice = append(blogsSlice,Blogs{id,blogs,createDate,blogType,typeId,title,titleId})
-	}
-	log.Println("blogsSlice:", blogsSlice)
-	if 0 ==  len(blogsSlice){
-		err = errors.New("not found")
-	}
-	return
-}
-
-func (m *Model)DelBlogs(title string)error{
+func (m *Model)EditBlog(title string)error{
+	//TODO
 	return nil
 }
 
-func (m *Model)AddComments(title, commtent string)error{
+func (m *Model)DelBlog(title string)error{
+	//TODO
 	return nil
 }
 
-func (m *Model)DelComments(title string)error{
+func (m *Model)AddComment(title, commtent string)error{
+	//TODO
+	return nil
+}
+
+func (m *Model)DelComment(title, comment string)error{
+	//TODO
 	return nil
 }

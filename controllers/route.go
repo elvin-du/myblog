@@ -20,13 +20,13 @@ func Register(w http.ResponseWriter, r *http.Request){
 		http.ServeFile(w,r, "libs" + urlPath)
 	case "/favicon.ico" == urlPath: //browser itself requests
 		http.ServeFile(w,r,"public/images/favicon.ico")
-	case "/" == urlPath || "/login" == urlPath:
+	case "/login" == urlPath:
 		ctrl.Login(w,r)
 	case "/register" == urlPath:
 		ctrl.Register(w,r)
 	case "/edit" == urlPath:
 		ctrl.Edit(w,r)
-	case "/index" == urlPath:
+	case "/" == urlPath:
 		ctrl.Index(w,r)
 	case strings.HasPrefix(urlPath, "/articles"):
 		ctrl.Articles(w,r)
