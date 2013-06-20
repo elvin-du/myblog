@@ -4,6 +4,9 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta http-equiv="Content-Language" content="zh-cn" />
+		<link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" meida="screen">
+		<script src="http://code.jquery.com/jquery.js"></script>
+		<script src="/bootstrap/js/bootstrap.min.js"></script>
 		<script type="text/javascript">
 			function login(){
 				var frm = document.getElementById("login_form");
@@ -17,12 +20,31 @@
 			}
 		</script>
 	</head>
-	<body>
-		<form method="POST" URL="/Index" id="login_form">
-			suername:<input type="text" name="username"></br>
-			password:<input type="password" name="password"></br>
-			<input type="button" value="submit" onclick="login();">
-		</form>
+	<body style="margin-top:10%">
+		<div class="row-fluid">
+			<div class="span4 offset3">
+				<form class="form-horizontal" method="POST" URL="/Index" id="login_form">
+					<div class="control-group">
+						<div class="controls">
+							<input type="text" id= "inputName" name="username" placeholder="用户名">
+						</div>
+					</div>
+					<div class="control-group">
+						<div class="controls">
+							<input type="password" id= "inputPassword" name="password" placeholder="密码">
+						</div>
+					</div>
+					<div class="control-group">
+						<div class="controls">
+							<button style="width:220px" type="submit" class="btn btn-primary" onclick="login();"> 登录</button>
+							<label class="checkbox">
+								<input type="checkbox" checked="checked"> 记住我
+							</label>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
 	</body>
 </html>
 

@@ -16,6 +16,8 @@ func Register(w http.ResponseWriter, r *http.Request){
 		ctrl.NotFound(w,r)
 	case strings.HasPrefix(urlPath, "/public")://static files
 		http.ServeFile(w,r, urlPath[1:])
+	case strings.HasPrefix(urlPath, "/bootstrap")://static files
+		http.ServeFile(w,r, "libs" + urlPath)
 	case "/favicon.ico" == urlPath: //browser itself requests
 		http.ServeFile(w,r,"public/images/favicon.ico")
 	case "/" == urlPath || "/login" == urlPath:
