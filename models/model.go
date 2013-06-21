@@ -205,6 +205,7 @@ func (m *Model)QueryTags()(err error,tags []Tag){
 		var id int
 		var tag string
 		rows.Scan(&id,&tag)
+		log.Println("tag", tag)
 		tags = append(tags, Tag{id,tag})
 	}
 	log.Println("Tags table :", tags)
