@@ -9,8 +9,9 @@
 				var frm = document.getElementById("edit_form");
 				var title = frm.title.value;
 				var content = frm.content.value;
-				if ("" == title || "" == content ){
-					alert("title or content can not be emtpy!");
+				var tag = frm.tag.value
+				if ("" == title || "" == content || "" == tag){
+					alert("title, content or tag can not be emtpy!");
 					return false;
 				}
 				frm.submit();
@@ -25,9 +26,9 @@
 	<body>
 		<form method="POST" URL="/edit" id="edit_form">
 			标题:</br>
-			<select name="arcticle_tag">
-				{{range .BlogTp}}
-				<option value="{{.BlogType}}">{{.BlogType}}</option>
+			<select name="tag">
+				{{range .Tags}}
+				<option value="{{.Id}}">{{.Tag}}</option>
 				{{end}}
 			</select>
 			<input type="text" name="title" size="110"></br>

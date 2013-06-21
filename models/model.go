@@ -8,6 +8,7 @@ import(
 	"errors"
 	"database/sql"
 	"time"
+	"strconv"
 )
 
 type Model struct{
@@ -167,7 +168,6 @@ func (m *Model)QueryBlogs()(err error,blogs []Blog){
 		return
 	}
 	defer db.Close()
-
 	sql := `SELECT * FROM myblog.blogs`
 	rows, err := db.Query(sql)
 	if nil != err{
@@ -180,24 +180,14 @@ func (m *Model)QueryBlogs()(err error,blogs []Blog){
 		rows.Scan(&id, &content, &title, &createDate, &tagId)
 		blogs = append(blogs,Blog{Id:id, Content:content,Title:title, CreateDate:createDate,TagId:tagId})
 	}
-	log.Println("blogsSlice:", blogs)
+	log.Println("Blogs table :", blogs)
 	if 0 ==  len(blogs){
 		err = errors.New("not found")
 	}
 	return
 }
 
-func (m *Model)QueryByTitle(blogId int)(err error, blog Blog){
-	//TODO
-	return
-}
-
-func (m *Model)QueryByTag(tagId int)(err error, blogs []Blog){
-	//TODO
-	return
-}
-
-//query all tags name
+//query all tags
 func (m *Model)QueryTags()(err error,tags []Tag){
 	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
 	if nil != err{
@@ -209,18 +199,73 @@ func (m *Model)QueryTags()(err error,tags []Tag){
 	rows, err := db.Query(querySql)
 	if nil != err{
 		log.Print(err)
-		return
 	}
 
-	flag := false
 	for rows.Next(){
-		flag = true
 		var id int
 		var tag string
 		rows.Scan(&id,&tag)
 		tags = append(tags, Tag{id,tag})
 	}
-	if !flag{
+	log.Println("Tags table :", tags)
+	if 0 == len(tags){
+		err = errors.New("not found")
+	}
+	return
+}
+
+func (m *Model)QueryByTitle(blogId int)(err error, blogs []Blog){
+	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
+	if nil != err{
+		log.Print(err)
+		return
+	}
+	defer db.Close()
+	querySql := `select * from myblog.blogs WHERE id=`
+	tmp := strconv.FormatInt(int64(blogId), 10)
+	querySql += tmp
+	rows, err := db.Query(querySql)
+	if nil != err{
+		log.Print(err)
+	}
+
+	for rows.Next(){
+		var id, tagId int
+		var content, title, createDate string
+		rows.Scan(&id, &content, &title, &createDate, &tagId)
+		blogs = append(blogs,Blog{Id:id, Content:content,Title:title, CreateDate:createDate,TagId:tagId})
+	}
+	log.Println("Blogs table :", blogs)
+	if 0 ==  len(blogs){
+		err = errors.New("not found")
+	}
+	return
+}
+
+func (m *Model)QueryByTag(tagId int)(err error, blogs []Blog){
+	//TODO
+	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
+	if nil != err{
+		log.Print(err)
+		return
+	}
+	defer db.Close()
+	querySql := "select * from myblog.blogs WHERE tag_id="
+	tmp := strconv.FormatInt(int64(tagId), 10)
+	querySql += tmp
+	rows, err := db.Query(querySql)
+	if nil != err{
+		log.Print(err)
+	}
+
+	for rows.Next(){
+		var id, tagId int
+		var content, title, createDate string
+		rows.Scan(&id, &content, &title, &createDate, &tagId)
+		blogs = append(blogs,Blog{Id:id, Content:content,Title:title, CreateDate:createDate,TagId:tagId})
+	}
+	log.Println("Blogs table :", blogs)
+	if 0 ==  len(blogs){
 		err = errors.New("not found")
 	}
 	return

@@ -11,18 +11,18 @@
 				<h1>杜满想的blog.唯有自律，方能自由！</h1>
 			</div>
 			<div id="content">
-				{{range .Blg}}
+				{{range .Blgs}}
 				<div>
 					<h1><a href="/articles/{{.Id}}">{{.Title}}</a></h1>
 				</div>
-				<div>{{.Blogs}}</div>
+				<div>{{.Content}}</div>
 				{{end}}
 			</div>
 			<div id="tag_menu">
 				<div><h1>标签</h1></div>
 				<ul>
-					{{range .BlgTp}}
-					<li><a href="/tags/{{.Id}}">{{.BlogType}}</a></li>
+					{{range .Tags}}
+					<li><a href="/tags/{{.Id}}">{{.Tag}}</a></li>
 					{{end}}
 				</ul>
 			</div>

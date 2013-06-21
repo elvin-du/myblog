@@ -34,11 +34,11 @@ func (c *Controller)Login(w http.ResponseWriter, r *http.Request){
 		psw := r.FormValue("password")
 		if err := CheckNamePsw(name,psw);nil != err{
 			log.Println(err)
-			http.Redirect(w,r,"/",http.StatusFound)
+			http.Redirect(w,r,"/login",http.StatusFound)
 			return
 		}
 		SetCookie(w, CreateSessionID(name))
-		http.Redirect(w,r,"/index",http.StatusFound)
+		http.Redirect(w,r,"/add",http.StatusFound)
 	}
 }
 
@@ -60,7 +60,7 @@ func (c *Controller)Index(w http.ResponseWriter, r *http.Request){
 		err, blogs:= model.QueryBlogs()
 		if nil != err{
 			log.Println(err)
-			blogs = append(blogs, models.Blog{Content:"no article"})
+			blogs = append(blogs, models.Blog{Title:"找不到文章！"})
 		}
 		err, tags:= model.QueryTags()
 		if nil != err{
@@ -103,12 +103,27 @@ func (c *Controller)Register(w http.ResponseWriter, r *http.Request){
 		}
 		model := models.Model{}
 		model.AddUser(name,psw)
-		http.Redirect(w,r,"/index",http.StatusFound)
+		http.Redirect(w,r,"/",http.StatusFound)
 	}
 }
 
+//edit blog
 func (c *Controller)Edit(w http.ResponseWriter, r *http.Request){
-	log.Println("entered Edit()")
+	//TODO
+}
+
+func (c *Controller)AddComment(w http.ResponseWriter, r *http.Request){
+	//TODO
+}
+
+//del blog or comment
+func (c *Controller)Del(w http.ResponseWriter, r *http.Request){
+	//TODO
+}
+
+func (c *Controller)AddBlog(w http.ResponseWriter, r *http.Request){
+	log.Println("entered Add()")
+	r.ParseForm()
 	//name,err :=CheckCookie(r)
 	//if err != nil{
 	//	log.Println(err)
@@ -136,10 +151,9 @@ func (c *Controller)Edit(w http.ResponseWriter, r *http.Request){
 			return
 		}
 	case "POST":
-		r.ParseForm()
 		title := r.FormValue("title")
 		content := r.FormValue("content")
-		tag := r.FormValue("arcticle_tag")
+		tag := r.FormValue("tag")
 		tagId, _ := strconv.Atoi(tag)
 		//log.Println("title: ", title)
 		//log.Println("content: ", content)
@@ -147,7 +161,7 @@ func (c *Controller)Edit(w http.ResponseWriter, r *http.Request){
 
 		model := models.Model{}
 		model.AddBlog(title,content,tagId)
-		http.Redirect(w,r,"/index",http.StatusFound)
+		http.Redirect(w,r,"/",http.StatusFound)
 	}
 }
 
@@ -170,7 +184,7 @@ func (c *Controller)Articles(w http.ResponseWriter, r *http.Request){
 		}
 
 		type tmp struct{
-			Blg		models.Blog
+			Blgs	[]models.Blog
 			Tags	[]models.Tag
 		}
 		tmp2 := tmp{blog, tags}
