@@ -4,28 +4,65 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		<meta http-equiv="Content-Language" content="zh-cn"/>
 		<link rel="stylesheet" href="/public/css/main.css" type="text/css"/>
+		<link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" meida="screen">
+		<script src="http://code.jquery.com/jquery.js"></script>
+		<script src="/bootstrap/js/bootstrap.min.js"></script>
 	</head>
-	<body>
-		<div id="container">
-			<div id="header">
-				<h1>杜满想的blog.唯有自律，方能自由！</h1>
-			</div>
-			<div id="content">
-				{{range .Blgs}}
-				<div>
-					<h1><a href="/articles/{{.Id}}">{{.Title}}</a></h1>
-				</div>
-				<div>{{.Content}}</div>
-				{{end}}
-			</div>
-			<div id="tag_menu">
-				<div><h1>标签</h1></div>
-				<ul>
-					{{range .Tags}}
-					<li><a href="/tags/{{.Id}}">{{.Tag}}</a></li>
-					{{end}}
+	<body style="padding:40px">
+		<div class="navbar navbar-fixed-top navbar-inverse">
+			<div class="navbar-inner">
+				<a class="brand" href="/">个人博客</a>
+				<ul class="nav">
+					<li class="active"><a href="#">首页</a></li>
+					<li><a href="#">关于</a></li>
+					<li><a href="#">联系</a></li>
 				</ul>
+				<form class="navbar-search pull-left">
+					<input type="text" class="search-query" placeholder="搜索">
+				</form>
 			</div>
 		</div>
+
+		<div class="hero-unit">
+			<h1>杜满想的网络世界！</h1>
+			<p>唯有自律，方能自由！</p>
+		</div>
+		
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span3">
+					<div class="well sidebar-nav">
+						<ul class="nav nav-list">
+							<li class="nav-header">标签：</li>
+							{{range .Tags}}
+							<li><a href="/tags/{{.Id}}">{{.Tag}}</a></li>
+							{{end}}
+						</ul>
+					</div><!--/.well -->
+				</div><!--/span-->
+				<div class="span9">
+					{{range .Blgs}}
+					<div>
+						<h3><a href="/articles/{{.Id}}">{{.Title}}</a></h3>
+					</div>
+					<div>{{.Content}}</div>
+					{{end}}
+				</div>
+			</div><!--row-fluid-->
+		</div><!--container-fulid-->
+
+		<div class="pagination pagination-right">
+		<ul>
+			<li><a href="#">Prev</a></li>
+			<li><a href="#">1</a></li>
+			<li><a href="#">2</a></li>
+			<li><a href="#">Next</a></li>
+		</ul>
+		</div>
+
+		<hr>
+		<footer>
+		<p>© by macs 2013</p>
+		</footer>
 	</body>
 </html>
