@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta http-equiv="Content-Language" content="zh-cn" />
+		<script type="text/javascript">
+			function register(){
+				var frm = document.getElementById("register_form");
+				var name = frm.username.value;
+				var password = frm.password.value;
+				var confirm_password = frm.confirm_password.value;
+				if( "" == name || "" == password || "" == confirm_password){
+					alert("username password can not be empty");	
+					return false;
+				}
+				if (password != confirm_password){
+					alert("password is not same!");
+					return false;
+				}
+				frm.submit();
+			}
+		</script>
+	</head>
+	<body>
+		<form id="register_form" method="POST" URL="/register">
+			suername:<input type="text" name="username"></br>
+			password:<input type="password" name="password"></br>
+			confirmed password:<input type="password" name="confirm_password"></br>
+			<input type="button" onclick="register();" value="submit" >
+		</form>
+	</body>
+</html>
+

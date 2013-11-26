@@ -55,7 +55,7 @@ func (this *Articles) IndexHandler(rw http.ResponseWriter, req *http.Request) {
 	//	}
 	switch req.Method {
 	case "GET":
-		t, err := template.ParseFiles("views/index.html")
+		t, err := template.ParseFiles("views/articles/index.html")
 		if nil != err {
 			logger.Errorln(err)
 			return
@@ -111,7 +111,7 @@ func (this *Articles) ArticleByTitleHandler(w http.ResponseWriter, r *http.Reque
 		}
 		tmp2 := tmp{blog, tags}
 
-		t, err := template.ParseFiles("views/index.html")
+		t, err := template.ParseFiles("views/articles/index.html")
 		if nil != err {
 			logger.Errorln(err)
 			return
@@ -151,7 +151,7 @@ func (this *Articles) ArticlesByTagHandler(w http.ResponseWriter, r *http.Reques
 			Tags []models.Tag
 		}
 		tmp2 := tmp{blgs, tags}
-		t, err := template.ParseFiles("views/index.html")
+		t, err := template.ParseFiles("views/articles/index.html")
 		if nil != err {
 			logger.Errorln(err)
 			return

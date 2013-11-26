@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta http-equiv="Content-Language" content="zh-cn" />
+		<script type="text/javascript">
+			function submitEdit(){
+				var frm = document.getElementById("edit_form");
+				var title = frm.title.value;
+				var content = frm.content.value;
+				var tag = frm.tag.value
+				if ("" == title || "" == content || "" == tag){
+					alert("title, content or tag can not be emtpy!");
+					return false;
+				}
+				frm.submit();
+			}
+		</script>
+		<style type="text/css">
+			body{
+				margin:30px 50px 30px 50px;
+			}
+		</style>
+	</head>
+	<body>
+		<form method="POST" URL="/edit" id="edit_form">
+			标题:</br>
+			<select name="tag">
+				{{range .Tags}}
+				<option value="{{.Id}}">{{.Tag}}</option>
+				{{end}}
+			</select>
+			<input type="text" name="title" size="110"></br>
+			内容:</br>
+			<textarea name="content" cols="150" rows="30"></textarea></br>
+			<input type="button" value="submit" onclick="submitEdit();">
+		</form>
+	</body>
+</html>

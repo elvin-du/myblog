@@ -5,6 +5,8 @@
 package controllers
 
 import (
+	"html/template"
+	"myblog/logger"
 	"net/http"
 )
 
@@ -19,14 +21,33 @@ func NewAbout() *About {
 }
 
 /*
-所有[/contact]路由的请求，都要经过这里进行转发
+所有[/about]路由的请求，都要经过这里进行转发
 */
 func (this *About) Handler(rw http.ResponseWriter, req *http.Request) {
 	req.ParseForm()
 	switch req.URL.Path {
-	case "/admin/login":
-			
+	case "/about":
+		this.AboutHandler(rw, req)
 	default:
 		NotFoundHandler(rw, req)
+	}
+}
+
+/*
+本站介绍
+*/
+func (this *About) AboutHandler(rw http.ResponseWriter, req *http.Request) {
+	switch req.Method {
+	case "GET":
+		t, err := template.ParseFiles("views/about/about.html")
+		if nil != err {
+			logger.Errorln(err)
+			return
+		}
+		if err = t.Execute(rw, nil); nil != err {
+			logger.Errorln(err)
+			return
+		}
+	case "POST":
 	}
 }

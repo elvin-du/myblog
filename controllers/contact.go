@@ -5,6 +5,8 @@
 package controllers
 
 import (
+	"html/template"
+	"myblog/logger"
 	"net/http"
 )
 
@@ -24,9 +26,28 @@ func NewContact() *Contact {
 func (this *Contact) Handler(rw http.ResponseWriter, req *http.Request) {
 	req.ParseForm()
 	switch req.URL.Path {
-	case "/admin/login":
-			
+	case "/contact":
+		this.ContactHandler(rw, req)
 	default:
 		NotFoundHandler(rw, req)
+	}
+}
+
+/*
+联系界面
+*/
+func (this *Contact) ContactHandler(rw http.ResponseWriter, req *http.Request) {
+	switch req.Method {
+	case "GET":
+		t, err := template.ParseFiles("views/contact/contact.html")
+		if nil != err {
+			logger.Errorln(err)
+			return
+		}
+		if err = t.Execute(rw, nil); nil != err {
+			logger.Errorln(err)
+			return
+		}
+	case "POST":
 	}
 }

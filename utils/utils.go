@@ -1,17 +1,17 @@
 package utils
 
-import(
-	"runtime"
-	"log"
+import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"time"
 )
 
 const (
-	BaseHtmlTplFile     = "public/html/common/base.html"
-	Error404HtmlTplFile = "public/html/common/404.html"
+	BaseHtmlTplFile     = "views/common/base.html"
+	Error404HtmlTplFile = "views/common/404.html"
 )
 
 func CheckError(err error) {

@@ -5,10 +5,10 @@
 package controllers
 
 import (
-	"net/http"
-	"myblog/logger"
 	"html/template"
+	"myblog/logger"
 	"myblog/models"
+	"net/http"
 	"strconv"
 )
 
@@ -38,7 +38,7 @@ func (this *Admin) Handler(rw http.ResponseWriter, req *http.Request) {
 	case urlPath == "/admin/addcomment":
 		this.AddCommentHandler(rw, req)
 	case urlPath == "/admin/delcomment":
-		this.DelHandler(rw,req)
+		this.DelHandler(rw, req)
 	case urlPath == "/admin/editblog":
 		this.EditBlogHandler(rw, req)
 	default:
@@ -51,14 +51,14 @@ func (this *Admin) Handler(rw http.ResponseWriter, req *http.Request) {
 */
 func (this *Admin) LoginHandler(rw http.ResponseWriter, req *http.Request) {
 	logger.Infoln("entered Login()")
-	switch req.Method{
+	switch req.Method {
 	case "GET":
-		t,err := template.ParseFiles("views/login.html")
-		if nil != err{
+		t, err := template.ParseFiles("views/admin/login.html")
+		if nil != err {
 			logger.Errorln(err)
 			return
 		}
-		if err = t.Execute(rw, nil); nil != err{
+		if err = t.Execute(rw, nil); nil != err {
 			logger.Errorln(err)
 			return
 		}
@@ -66,13 +66,13 @@ func (this *Admin) LoginHandler(rw http.ResponseWriter, req *http.Request) {
 		req.ParseForm()
 		name := req.FormValue("username")
 		psw := req.FormValue("password")
-		if err := CheckNamePsw(name,psw);nil != err{
+		if err := CheckNamePsw(name, psw); nil != err {
 			logger.Errorln(err)
-			http.Redirect(rw,req,"/login",http.StatusFound)
+			http.Redirect(rw, req, "/login", http.StatusFound)
 			return
 		}
 		SetCookie(rw, CreateSessionID(name))
-		http.Redirect(rw,req,"/add",http.StatusFound)
+		http.Redirect(rw, req, "/add", http.StatusFound)
 	}
 }
 
@@ -81,14 +81,14 @@ func (this *Admin) LoginHandler(rw http.ResponseWriter, req *http.Request) {
 */
 func (this *Admin) RegisterHandler(rw http.ResponseWriter, req *http.Request) {
 	logger.Infoln("entered Register()")
-	switch req.Method{
+	switch req.Method {
 	case "GET":
-		t,err := template.ParseFiles("views/register.html")
-		if nil != err{
+		t, err := template.ParseFiles("views/admin/register.html")
+		if nil != err {
 			logger.Errorln(err)
 			return
 		}
-		if err = t.Execute(rw, nil); nil != err{
+		if err = t.Execute(rw, nil); nil != err {
 			logger.Errorln(err)
 			return
 		}
@@ -97,17 +97,16 @@ func (this *Admin) RegisterHandler(rw http.ResponseWriter, req *http.Request) {
 		name := req.FormValue("username")
 		psw := req.FormValue("password")
 		confirmPsw := req.FormValue("confirm_password")
-		if psw != confirmPsw{
+		if psw != confirmPsw {
 			//TBD
 		}
 		model := models.Model{}
-		model.AddUser(name,psw)
-		http.Redirect(rw,req,"/",http.StatusFound)
+		model.AddUser(name, psw)
+		http.Redirect(rw, req, "/", http.StatusFound)
 	}
 }
 
-
-func (c *Admin)AddBlogHandler(rw http.ResponseWriter, req *http.Request){
+func (c *Admin) AddBlogHandler(rw http.ResponseWriter, req *http.Request) {
 	logger.Infoln("entered Add()")
 	req.ParseForm()
 	//name,err :=CheckCookie(r)
@@ -115,24 +114,24 @@ func (c *Admin)AddBlogHandler(rw http.ResponseWriter, req *http.Request){
 	//	log.Println(err)
 	//	http.Redirect(w,r,"/", http.StatusFound)
 	//	return
-//	}
-	switch req.Method{
+	//	}
+	switch req.Method {
 	case "GET":
-		t,err := template.ParseFiles("views/edit.html")
-		if nil != err{
+		t, err := template.ParseFiles("views/admin/edit.html")
+		if nil != err {
 			logger.Errorln(err)
 			return
 		}
 		m := models.Model{}
-		err, tags:= m.QueryTags()
-		if nil != err{
+		err, tags := m.QueryTags()
+		if nil != err {
 			logger.Errorln(err)
 		}
-		type tmp struct{
+		type tmp struct {
 			Tags []models.Tag
 		}
 		tmp2 := tmp{tags}
-		if err = t.Execute(rw, tmp2); nil != err{
+		if err = t.Execute(rw, tmp2); nil != err {
 			logger.Errorln(err)
 			return
 		}
@@ -146,24 +145,24 @@ func (c *Admin)AddBlogHandler(rw http.ResponseWriter, req *http.Request){
 		//log.Println("arcticleTag: ", arcticleTag)
 
 		model := models.Model{}
-		model.AddBlog(title,content,tagId)
-		http.Redirect(rw,req,"/",http.StatusFound)
+		model.AddBlog(title, content, tagId)
+		http.Redirect(rw, req, "/", http.StatusFound)
 	}
 }
 
 //edit blog
-func (c *Admin)EditBlogHandler(rw http.ResponseWriter, req *http.Request){
+func (c *Admin) EditBlogHandler(rw http.ResponseWriter, req *http.Request) {
 	//TODO
 }
 
 /*
 添加评论的处理函数
 */
-func (c *Admin)AddCommentHandler(rw http.ResponseWriter, req *http.Request){
+func (c *Admin) AddCommentHandler(rw http.ResponseWriter, req *http.Request) {
 	//TODO
 }
 
 //del blog or comment
-func (c *Admin)DelHandler(rw http.ResponseWriter, req *http.Request){
+func (c *Admin) DelHandler(rw http.ResponseWriter, req *http.Request) {
 	//TODO
 }
