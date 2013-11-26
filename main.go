@@ -1,9 +1,10 @@
-﻿package main
+package main
 
 import(
 	"net/http"
 	"log"
-	"myblog/controllers"
+	"myblog/logger"
+	"myblog/config"
 )
 
 func init(){
@@ -11,8 +12,11 @@ func init(){
 }
 
 func main(){
-	println("listen on port :8888")
-	if err := http.ListenAndServe(":8888",http.HandlerFunc(controllers.Register)); err != nil{
-		log.Fatal(err)
+	log.Println("listen on port :8888")
+	logger.Infoln("Server Started, listen on port: 8888")
+	if err := http.ListenAndServe(config.Config["host"],http.HandlerFunc(router)); err != nil{
+		log.Println("ListenAndServe:", err)
+		logger.Errorln("ListenAndServe:", err)
+		return
 	}
 }

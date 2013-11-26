@@ -4,16 +4,20 @@ import(
 	_"github.com/Go-SQL-Driver/MySQL"
 	"html"
 	"strings"
-	"log"
 	"errors"
 	"database/sql"
 	"time"
 	"strconv"
+	"myblog/logger"
+	"myblog/config"
 )
 
 type Model struct{
 }
 
+/*
+博客
+*/
 type Blog struct{
 	Id				int
 	Content			string
@@ -23,6 +27,9 @@ type Blog struct{
 	Comments		[]Comment
 }
 
+/*
+文章评论
+*/
 type Comment struct{
 	Id			int
 	IP			string
@@ -31,24 +38,31 @@ type Comment struct{
 	BlogId		int
 }
 
+/*
+文章标签
+*/
 type Tag struct{
 	Id			int
 	Tag			string
 }
 
-func (m *Model)CheckNamePsw(name,psw string)error{
+/*
+检查用户名和密码
+Return Value：nil：success
+*/
+func (this *Model)CheckNamePsw(name,psw string)error{
 	username := html.EscapeString(name)
 	password := html.EscapeString(psw)
 	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 		return err
 	}
 	defer db.Close()
 	querySql := "select 1 from myblog.users WHERE name = '" + username + "' AND password = '" + password + "'"
 	rows, err := db.Query(querySql)
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 		return err
 	}
 	if rows.Next(){
@@ -58,19 +72,22 @@ func (m *Model)CheckNamePsw(name,psw string)error{
 	return errors.New("Unkown error") 
 }
 
-func (m *Model)AddUser(name,psw string)error{
+/*
+添加管理员
+*/
+func (this *Model)AddUser(name,psw string)error{
 	username := html.EscapeString(name)
 	password := html.EscapeString(psw)
 	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 		return err
 	}
 	defer db.Close()
 	querySql := "select 1 from myblog.users WHERE name = ' " + username + "'"
 	rows, err := db.Query(querySql)
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 		return err
 	}
 	if rows.Next(){
@@ -80,33 +97,36 @@ func (m *Model)AddUser(name,psw string)error{
 	insertSql := "INSERT myblog.users SET name=?, password=?"
 	stmt, err := db.Prepare(insertSql)
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 		return err
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(username, password)
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 		return err
 	}
 
 	return nil
 }
 
+/*
+
+*/
 func GetId(title,blogType,username string)(titleId,typeId,userId int64){
 	title = html.EscapeString(title)
 	blogType = html.EscapeString(blogType)
 	username = html.EscapeString(username)
 	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 	}
 	defer db.Close()
 	sql := `SELECT id FROM myblog.title WHERE title = '` + title + `'`
 	rows , err := db.Query(sql)
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 	}
 	for rows.Next(){
 		rows.Scan(&titleId)
@@ -115,7 +135,7 @@ func GetId(title,blogType,username string)(titleId,typeId,userId int64){
 	sql = `SELECT id FROM myblog.blog_type WHERE blog_type = '` + blogType + `'`
 	rows , err = db.Query(sql)
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 	}
 	for rows.Next(){
 		rows.Scan(&typeId)
@@ -124,7 +144,7 @@ func GetId(title,blogType,username string)(titleId,typeId,userId int64){
 	sql = `SELECT userid FROM myblog.users WHERE name = '` + username+ `'`
 	rows , err = db.Query(sql)
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 	}
 	for rows.Next(){
 		rows.Scan(&userId)
@@ -132,12 +152,15 @@ func GetId(title,blogType,username string)(titleId,typeId,userId int64){
 	return
 }
 
-func (m *Model)AddBlog(title, content string, tagId int)error{
+/*
+添加博客
+*/
+func (this *Model)AddBlog(title, content string, tagId int)error{
 	title = html.EscapeString(title)
 	content = html.EscapeString(content)
 	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 		return err
 	}
 	defer db.Close()
@@ -145,7 +168,7 @@ func (m *Model)AddBlog(title, content string, tagId int)error{
 	insertSql := "INSERT myblog.blogs SET content=?, title=?, create_date=?, tag_id=?"
 	stmt, err := db.Prepare(insertSql)
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 		return err
 	}
 	defer stmt.Close()
@@ -153,25 +176,27 @@ func (m *Model)AddBlog(title, content string, tagId int)error{
 	now := strings.Split(time.Now().String(), " ")[0]
 	_, err = stmt.Exec(content, title, now, tagId)
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 		return err
 	}
 
 	return nil
 }
 
-//query all blogs
-func (m *Model)QueryBlogs()(err error,blogs []Blog){
-	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
+/*
+query all blogs
+*/
+func (this *Model)QueryBlogs()(err error,blogs []Blog){
+	db, err := sql.Open(config.Config["driver_name"], config.Config["dsn"])
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 		return
 	}
 	defer db.Close()
 	sql := `SELECT * FROM myblog.blogs`
 	rows, err := db.Query(sql)
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 	}
 
 	for rows.Next(){
@@ -180,45 +205,49 @@ func (m *Model)QueryBlogs()(err error,blogs []Blog){
 		rows.Scan(&id, &content, &title, &createDate, &tagId)
 		blogs = append(blogs,Blog{Id:id, Content:content,Title:title, CreateDate:createDate,TagId:tagId})
 	}
-	log.Println("Blogs table :", blogs)
+	logger.Debugln("Blogs table :", blogs)
 	if 0 ==  len(blogs){
 		err = errors.New("not found")
 	}
 	return
 }
 
-//query all tags
-func (m *Model)QueryTags()(err error,tags []Tag){
+/*
+query all tags
+*/
+func (this *Model)QueryTags()(err error,tags []Tag){
 	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 		return
 	}
 	defer db.Close()
 	querySql := "select * from myblog.tags"
 	rows, err := db.Query(querySql)
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 	}
 
 	for rows.Next(){
 		var id int
 		var tag string
 		rows.Scan(&id,&tag)
-		log.Println("tag", tag)
 		tags = append(tags, Tag{id,tag})
 	}
-	log.Println("Tags table :", tags)
+	logger.Debugln("Tags table :", tags)
 	if 0 == len(tags){
 		err = errors.New("not found")
 	}
 	return
 }
 
-func (m *Model)QueryByTitle(blogId int)(err error, blogs []Blog){
+/*
+根据博客标题检索博客
+*/
+func (this *Model)QueryByTitle(blogId int)(err error, blogs []Blog){
 	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 		return
 	}
 	defer db.Close()
@@ -227,7 +256,7 @@ func (m *Model)QueryByTitle(blogId int)(err error, blogs []Blog){
 	querySql += tmp
 	rows, err := db.Query(querySql)
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 	}
 
 	for rows.Next(){
@@ -236,18 +265,21 @@ func (m *Model)QueryByTitle(blogId int)(err error, blogs []Blog){
 		rows.Scan(&id, &content, &title, &createDate, &tagId)
 		blogs = append(blogs,Blog{Id:id, Content:content,Title:title, CreateDate:createDate,TagId:tagId})
 	}
-	log.Println("Blogs table :", blogs)
+	logger.Debugln("Blogs table :", blogs)
 	if 0 ==  len(blogs){
 		err = errors.New("not found")
 	}
 	return
 }
 
-func (m *Model)QueryByTag(tagId int)(err error, blogs []Blog){
+/*
+根据标签检索博客
+*/
+func (this *Model)QueryByTag(tagId int)(err error, blogs []Blog){
 	//TODO
 	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 		return
 	}
 	defer db.Close()
@@ -256,7 +288,7 @@ func (m *Model)QueryByTag(tagId int)(err error, blogs []Blog){
 	querySql += tmp
 	rows, err := db.Query(querySql)
 	if nil != err{
-		log.Print(err)
+		logger.Errorln(err)
 	}
 
 	for rows.Next(){
@@ -265,29 +297,41 @@ func (m *Model)QueryByTag(tagId int)(err error, blogs []Blog){
 		rows.Scan(&id, &content, &title, &createDate, &tagId)
 		blogs = append(blogs,Blog{Id:id, Content:content,Title:title, CreateDate:createDate,TagId:tagId})
 	}
-	log.Println("Blogs table :", blogs)
+	logger.Debugln("Blogs table :", blogs)
 	if 0 ==  len(blogs){
 		err = errors.New("not found")
 	}
 	return
 }
 
-func (m *Model)EditBlog(title string)error{
+/*
+编辑博客
+*/
+func (this *Model)EditBlog(title string)error{
 	//TODO
 	return nil
 }
 
-func (m *Model)DelBlog(title string)error{
+/*
+删除博客
+*/
+func (this *Model)DelBlog(title string)error{
 	//TODO
 	return nil
 }
 
-func (m *Model)AddComment(title, commtent string)error{
+/*
+添加评论
+*/
+func (this *Model)AddComment(title, commtent string)error{
 	//TODO
 	return nil
 }
 
-func (m *Model)DelComment(title, comment string)error{
+/*
+删除评论
+*/
+func (this *Model)DelComment(title, comment string)error{
 	//TODO
 	return nil
 }
