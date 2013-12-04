@@ -35,7 +35,7 @@
 						<ul class="nav nav-list">
 							<li class="nav-header">标签：</li>
 							{{range .Tags}}
-							<li><a href="/articles/tags/{{.Id}}">{{.Tag}}</a></li>
+							<li><a href="/articles?tag={{.Id}}">{{.Tag}}</a></li>
 							{{end}}
 						</ul>
 					</div><!--/.well -->
@@ -44,7 +44,7 @@
 					{{range .Blgs}}
 					<div class="panel panel-default">
 						<div class="panel-heading">
-							<h3><a href="/articles/{{.Id}}">{{.Title}}</a></h3>
+							<h3><a href="/articles?title={{.Id}}">{{.Title}}</a></h3>
 						</div>
 						<div class="panel-body">
 							<pre>{{.Content}}</pre>

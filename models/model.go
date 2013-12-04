@@ -194,19 +194,25 @@ func (this *Model) AddBlog(title, content string, tagId int) error {
 /*
 query all blogs
 */
-func (this *Model) QueryBlogs() (err error, blogs []Blog) {
+func (this *Model) QueryBlogs() (blogs []Blog, err error) {
+	//连接数据库
 	db, err := sql.Open(config.Config["driver_name"], config.Config["dsn"])
 	if nil != err {
 		logger.Errorln(err)
 		return
 	}
 	defer db.Close()
+
 	sql := `SELECT * FROM myblog.blogs`
+
+	//执行SQL语句
 	rows, err := db.Query(sql)
 	if nil != err {
 		logger.Errorln(err)
+		return
 	}
 
+	//把查询到的数据格式化
 	for rows.Next() {
 		var id, tagId int
 		var content, title, createDate string
@@ -214,6 +220,8 @@ func (this *Model) QueryBlogs() (err error, blogs []Blog) {
 		blogs = append(blogs, Blog{Id: id, Content: content, Title: title, CreateDate: createDate, TagId: tagId})
 	}
 	logger.Debugln("Blogs table :", blogs)
+
+	//没有查询到博客，设置err值
 	if 0 == len(blogs) {
 		err = errors.New("not found")
 	}
