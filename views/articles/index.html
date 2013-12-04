@@ -4,7 +4,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		<meta http-equiv="Content-Language" content="zh-cn"/>
 		<link rel="stylesheet" href="/public/css/main.css" type="text/css"/>
-		<link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" meida="screen">
+		<link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
 		<script src="http://code.jquery.com/jquery.js"></script>
 		<script src="/bootstrap/js/bootstrap.min.js"></script>
 	</head>
@@ -42,10 +42,14 @@
 				</div><!--/span-->
 				<div class="span9">
 					{{range .Blgs}}
-					<div>
-						<h3><a href="/articles/{{.Id}}">{{.Title}}</a></h3>
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h3><a href="/articles/{{.Id}}">{{.Title}}</a></h3>
+						</div>
+						<div class="panel-body">
+							<pre>{{.Content}}</pre>
+						</div>
 					</div>
-					<div>{{.Content}}</div>
 					{{end}}
 				</div>
 			</div><!--row-fluid-->

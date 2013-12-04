@@ -1,5 +1,6 @@
 /*
 处理管理员相关业务
+管理员用户注册，登录，删除博客，添加博客，修改博客，添加博客评论，删除博客评论
 */
 
 package controllers
@@ -35,12 +36,14 @@ func (this *Admin) Handler(rw http.ResponseWriter, req *http.Request) {
 		this.RegisterHandler(rw, req)
 	case urlPath == "/admin/addblog":
 		this.AddBlogHandler(rw, req)
+	case urlPath == "/admin/editblog":
+		this.EditBlogHandler(rw, req)
+	case urlPath == "/admin/delblog":
+		this.DelBlogHandler(rw, req)
 	case urlPath == "/admin/addcomment":
 		this.AddCommentHandler(rw, req)
 	case urlPath == "/admin/delcomment":
-		this.DelHandler(rw, req)
-	case urlPath == "/admin/editblog":
-		this.EditBlogHandler(rw, req)
+		this.DelCommentHandler(rw, req)
 	default:
 		NotFoundHandler(rw, req)
 	}
@@ -106,8 +109,8 @@ func (this *Admin) RegisterHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (c *Admin) AddBlogHandler(rw http.ResponseWriter, req *http.Request) {
-	logger.Infoln("entered Add()")
+func (this *Admin) AddBlogHandler(rw http.ResponseWriter, req *http.Request) {
+	logger.Infoln("entered AddBlogHandler()")
 	req.ParseForm()
 	//name,err :=CheckCookie(r)
 	//if err != nil{
@@ -117,16 +120,18 @@ func (c *Admin) AddBlogHandler(rw http.ResponseWriter, req *http.Request) {
 	//	}
 	switch req.Method {
 	case "GET":
-		t, err := template.ParseFiles("views/admin/edit.html")
+		t, err := template.ParseFiles("views/admin/add_blog.html")
 		if nil != err {
 			logger.Errorln(err)
 			return
 		}
+		//查询博客标签
 		m := models.Model{}
 		err, tags := m.QueryTags()
 		if nil != err {
 			logger.Errorln(err)
 		}
+		//为了使用查询出来的博客标签，格式化查询结果
 		type tmp struct {
 			Tags []models.Tag
 		}
@@ -139,10 +144,10 @@ func (c *Admin) AddBlogHandler(rw http.ResponseWriter, req *http.Request) {
 		title := req.FormValue("title")
 		content := req.FormValue("content")
 		tag := req.FormValue("tag")
-		tagId, _ := strconv.Atoi(tag)
-		//log.Println("title: ", title)
-		//log.Println("content: ", content)
-		//log.Println("arcticleTag: ", arcticleTag)
+		tagId, _ := strconv.Atoi(tag) //从前端返回的是tag的ID
+		logger.Debugln("title: ", title)
+		logger.Debugln("content: ", content)
+		logger.Debugln("arcticleTag: ", tag)
 
 		model := models.Model{}
 		model.AddBlog(title, content, tagId)
@@ -150,19 +155,30 @@ func (c *Admin) AddBlogHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 }
 
-//edit blog
-func (c *Admin) EditBlogHandler(rw http.ResponseWriter, req *http.Request) {
+/*
+edit blog
+*/
+func (this *Admin) EditBlogHandler(rw http.ResponseWriter, req *http.Request) {
+	//TODO
+}
+
+/*
+del blog
+*/
+func (this *Admin) DelBlogHandler(rw http.ResponseWriter, req *http.Request) {
 	//TODO
 }
 
 /*
 添加评论的处理函数
 */
-func (c *Admin) AddCommentHandler(rw http.ResponseWriter, req *http.Request) {
+func (this *Admin) AddCommentHandler(rw http.ResponseWriter, req *http.Request) {
 	//TODO
 }
 
-//del blog or comment
-func (c *Admin) DelHandler(rw http.ResponseWriter, req *http.Request) {
+/*
+del comment
+*/
+func (this *Admin) DelCommentHandler(rw http.ResponseWriter, req *http.Request) {
 	//TODO
 }

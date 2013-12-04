@@ -1,0 +1,17 @@
+2013/12/04 11:08:46 Server Started, listen on port: 8888
+2013/12/04 11:09:55 entered IndexHandler()
+2013/12/04 11:10:02 entered Login()
+2013/12/04 11:20:58 Server Started, listen on port: 8888
+2013/12/04 11:21:05 entered AddBlogHandler()
+2013/12/04 11:46:11 Server Started, listen on port: 8888
+2013/12/04 11:46:14 entered AddBlogHandler()
+2013/12/04 11:47:48 entered AddBlogHandler()
+2013/12/04 11:47:48 entered IndexHandler()
+2013/12/04 11:58:28 Server Started, listen on port: 8888
+2013/12/04 11:58:50 entered AddBlogHandler()
+2013/12/04 11:58:51 entered AddBlogHandler()
+2013/12/04 11:59:22 entered AddBlogHandler()
+2013/12/04 11:59:22 entered IndexHandler()
+2013/12/04 11:59:38 entered AddBlogHandler()
+2013/12/04 11:59:41 entered AddBlogHandler()
+2013/12/04 11:59:41 entered IndexHandler()

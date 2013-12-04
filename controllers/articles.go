@@ -60,27 +60,35 @@ func (this *Articles) IndexHandler(rw http.ResponseWriter, req *http.Request) {
 			logger.Errorln(err)
 			return
 		}
+
+		//提取所有博客
 		model := models.Model{}
 		err, blogs := model.QueryBlogs()
 		if nil != err {
 			logger.Errorln(err)
 			blogs = append(blogs, models.Blog{Title: "找不到文章！"})
 		}
+
+		//提取所有博客标签
 		err, tags := model.QueryTags()
 		if nil != err {
 			logger.Errorln(err)
 		}
+
+		//格式化所有博客和标签，以便template包使用
 		type tmp struct {
 			Blgs []models.Blog
 			Tags []models.Tag
 		}
-
 		tmp2 := tmp{blogs, tags}
+
+		//显示内容
 		if err = t.Execute(rw, tmp2); nil != err {
 			logger.Errorln(err)
 			return
 		}
 	case "POST":
+		//TODO
 	}
 }
 
