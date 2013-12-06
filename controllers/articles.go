@@ -17,6 +17,9 @@ type Articles struct {
 	*Controller
 }
 
+//保存所有博客内容
+var AllBlogs = []models.Blog{}
+
 /*
 create a  new Arcticle
 */
@@ -32,8 +35,7 @@ func NewArticles() *Articles {
 func (this *Articles) Handler(rw http.ResponseWriter, req *http.Request) {
 	urlPath := req.URL.Path
 	switch {
-	case urlPath == "/":
-	case strings.HasPrefix(urlPath, "/articles"):
+	case urlPath == "/" || strings.HasPrefix(urlPath, "/articles"):
 		this.ArticlesHandler(rw, req)
 	default:
 		NotFoundHandler(rw, req)
@@ -44,7 +46,7 @@ func (this *Articles) Handler(rw http.ResponseWriter, req *http.Request) {
 显示所有文章
 */
 func (this *Articles) ArticlesHandler(rw http.ResponseWriter, req *http.Request) {
-	logger.Infoln("entered IndexHandler()")
+	logger.Infoln("entered ArticlesHandler()")
 	//username,err := CheckCookie(r)
 	//if err != nil{
 	//	log.Println(err)
@@ -52,35 +54,35 @@ func (this *Articles) ArticlesHandler(rw http.ResponseWriter, req *http.Request)
 	//	}
 	var blogs []models.Blog
 	var err error
-	model := models.Model{}
 	switch req.Method {
 	case "GET":
 		switch {
 		case "" != req.FormValue("title"):
 			strTitle := req.FormValue("title")
+			logger.Debugln(strTitle)
 			titleId, _ := strconv.Atoi(strTitle)
 			blogs, err = this.ArticleByTitle(titleId)
 		case "" != req.FormValue("tag"):
 			strTag := req.FormValue("tag")
+			logger.Debugln(strTag)
 			tagId, _ := strconv.Atoi(strTag)
 			blogs, err = this.ArticleByTitle(tagId)
 		case "" != req.FormValue("page"):
 			strPage := req.FormValue("page")
+			logger.Debugln(strPage)
 			pageId, _ := strconv.Atoi(strPage)
 			blogs, err = this.ArticleByPage(pageId)
 		default:
-			//提取所有博客
-			blogs, err = model.QueryBlogs()
+			err = this.QueryAllBlogs()
 			if nil != err {
 				logger.Errorln(err)
-				blogs = append(blogs, models.Blog{Title: "找不到文章！"})
 				return
 			}
+			blogs = AllBlogs
 		}
-
 		//获取所有标签
 		var tags []models.Tag
-		err, tags = model.QueryTags()
+		tags, err = new(models.Model).QueryTags()
 		if nil != err {
 			logger.Errorln(err)
 			return
@@ -112,9 +114,8 @@ func (this *Articles) ArticlesHandler(rw http.ResponseWriter, req *http.Request)
 根据用户选择的标题，获取具体博客
 */
 func (this *Articles) ArticleByTitle(blogId int) (blog []models.Blog, err error) {
-	model := models.Model{}
 	//按照标题查找博客
-	err, blog = model.QueryByTitle(blogId)
+	blog, err = new(models.Model).QueryByTitle(blogId)
 	if nil != err {
 		logger.Errorln(err)
 	}
@@ -125,14 +126,12 @@ func (this *Articles) ArticleByTitle(blogId int) (blog []models.Blog, err error)
 根据用户选择的tag，来显示具体哪些文章
 */
 func (this *Articles) ArticlesByTag(tagId int) (blogs []models.Blog, err error) {
-	model := models.Model{}
 	//按照标签查找博客
-	err, blogs = model.QueryByTag(tagId)
+	blogs, err = new(models.Model).QueryByTag(tagId)
 	if nil != err {
 		logger.Errorln(err)
 		blogs = append(blogs, models.Blog{Title: "no article"})
 	}
-
 	return
 }
 
@@ -140,5 +139,34 @@ func (this *Articles) ArticlesByTag(tagId int) (blogs []models.Blog, err error) 
 根据用户选择的page，来显示具体哪些文章
 */
 func (this *Articles) ArticleByPage(tagId int) (blogs []models.Blog, err error) {
+	err = this.QueryAllBlogs()
+	if nil != err {
+		logger.Errorln(err)
+		return
+	}
+
+	const MaxPageNum = 3 //一页最大显示博客数量
+	//访问的page没有超出
+	if tagId <= 0 || len(AllBlogs) < tagId*MaxPageNum+MaxPageNum {
+		blogs = AllBlogs[0:MaxPageNum : MaxPageNum+1]
+	} else {
+		blogs = AllBlogs[tagId*MaxPageNum : tagId*MaxPageNum+MaxPageNum : MaxPageNum+1]
+	}
+
+	return
+}
+
+/*
+获取所有博客内容存储在@AllBlogs
+*/
+func (this *Articles) QueryAllBlogs() (err error) {
+	if 0 < len(AllBlogs) {
+		return //已经查询过，AllBlogs已经有数据
+	}
+	//提取所有博客
+	AllBlogs, err = new(models.Model).QueryBlogs()
+	if nil != err {
+		logger.Errorln(err)
+	}
 	return
 }

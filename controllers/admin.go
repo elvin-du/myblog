@@ -127,7 +127,7 @@ func (this *Admin) AddBlogHandler(rw http.ResponseWriter, req *http.Request) {
 		}
 		//查询博客标签
 		m := models.Model{}
-		err, tags := m.QueryTags()
+		tags, err := m.QueryTags()
 		if nil != err {
 			logger.Errorln(err)
 		}

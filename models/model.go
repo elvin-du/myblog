@@ -203,6 +203,9 @@ func (this *Model) QueryBlogs() (blogs []Blog, err error) {
 	}
 	defer db.Close()
 
+	//sql := `SELECT * FROM myblog.blogs LIMIT `
+	//因为博客文章不多，所以一次性的把所有博客都读取到内存中。
+	//数据库更新频率很低，所以也没有内存和数据之间的同步
 	sql := `SELECT * FROM myblog.blogs`
 
 	//执行SQL语句
@@ -231,7 +234,7 @@ func (this *Model) QueryBlogs() (blogs []Blog, err error) {
 /*
 query all tags
 */
-func (this *Model) QueryTags() (err error, tags []Tag) {
+func (this *Model) QueryTags() (tags []Tag,err error) {
 	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
 	if nil != err {
 		logger.Errorln(err)
@@ -260,7 +263,7 @@ func (this *Model) QueryTags() (err error, tags []Tag) {
 /*
 根据博客标题检索博客
 */
-func (this *Model) QueryByTitle(blogId int) (err error, blogs []Blog) {
+func (this *Model) QueryByTitle(blogId int) (blogs []Blog, err error) {
 	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
 	if nil != err {
 		logger.Errorln(err)
@@ -291,7 +294,7 @@ func (this *Model) QueryByTitle(blogId int) (err error, blogs []Blog) {
 /*
 根据标签检索博客
 */
-func (this *Model) QueryByTag(tagId int) (err error, blogs []Blog) {
+func (this *Model) QueryByTag(tagId int) (blogs []Blog, err error) {
 	//TODO
 	db, err := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/myblog?charset=utf8")
 	if nil != err {
