@@ -5,11 +5,11 @@
 package logger
 
 import (
-	"myblog/config"
 	"io"
 	"log"
-	"os"
+	"myblog/config"
 	"myblog/utils"
+	"os"
 )
 
 var (
