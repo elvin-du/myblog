@@ -6,8 +6,10 @@ package controllers
 
 import (
 	"html/template"
+	"log"
 	"myblog/logger"
 	"myblog/models"
+	"myblog/utils"
 	"net/http"
 	"strconv"
 	"strings"
@@ -20,6 +22,7 @@ type Articles struct {
 //保存所有博客内容
 var AllBlogs = []models.Blog{}
 
+const MaxPageNum = 3 //一页最大显示博客数量
 /*
 create a  new Arcticle
 */
@@ -54,6 +57,7 @@ func (this *Articles) ArticlesHandler(rw http.ResponseWriter, req *http.Request)
 	//	}
 	var blogs []models.Blog
 	var err error
+	var pageId int = 0
 	switch req.Method {
 	case "GET":
 		switch {
@@ -70,7 +74,7 @@ func (this *Articles) ArticlesHandler(rw http.ResponseWriter, req *http.Request)
 		case "" != req.FormValue("page"):
 			strPage := req.FormValue("page")
 			logger.Debugln(strPage)
-			pageId, _ := strconv.Atoi(strPage)
+			pageId, _ = strconv.Atoi(strPage)
 			blogs, err = this.ArticleByPage(pageId)
 		default:
 			err = this.QueryAllBlogs()
@@ -90,19 +94,43 @@ func (this *Articles) ArticlesHandler(rw http.ResponseWriter, req *http.Request)
 
 		//格式化所有博客和标签，以便template包使用
 		type tmp struct {
-			Blgs []models.Blog
-			Tags []models.Tag
+			Blgs    []models.Blog
+			Tags    []models.Tag
+			Page    []int //多少页博客
+			CurPage int   //现在显示哪一页
 		}
-		tmp2 := tmp{blogs, tags}
-		t, err := template.ParseFiles("views/articles/index.html")
+		//为了在前端显示分页信息，make一个数组
+		pageNum := 0
+		if len(AllBlogs)%MaxPageNum == 0 {
+			pageNum = len(AllBlogs) / MaxPageNum
+		} else {
+			pageNum = len(AllBlogs)/MaxPageNum + 1
+		}
+		var pages = make([]int, pageNum, pageNum)
+		for i := 0; i < pageNum; i++ {
+			pages[i] = i + 1
+		}
+		if 0 == pageId {
+			pageId = pageId + 1
+		}
+		tmp2 := tmp{blogs, tags, pages, pageId}
+		t := template.New("")
+		t = t.Funcs(template.FuncMap{"plus": utils.Plus})
+		//ParseFiles uses the filename as the template name inside of the template object.
+		t, err = t.ParseFiles("views/articles/index.html")
 		if nil != err {
 			logger.Errorln(err)
+			log.Println(err)
 			return
 		}
 
 		//显示内容
-		if err = t.Execute(rw, tmp2); nil != err {
+		//ParseFiles uses the filename as the template name inside of the template object.
+		//So, Have to use ExecuteTemplate() instead fo Execute(),
+		//and use index.html as the name of t
+		if err = t.ExecuteTemplate(rw, "index.html", tmp2); nil != err {
 			logger.Errorln(err)
+			log.Println(err)
 			return
 		}
 	case "POST":
@@ -138,19 +166,21 @@ func (this *Articles) ArticlesByTag(tagId int) (blogs []models.Blog, err error) 
 /*
 根据用户选择的page，来显示具体哪些文章
 */
-func (this *Articles) ArticleByPage(tagId int) (blogs []models.Blog, err error) {
+func (this *Articles) ArticleByPage(pageId int) (blogs []models.Blog, err error) {
 	err = this.QueryAllBlogs()
 	if nil != err {
 		logger.Errorln(err)
 		return
 	}
-
-	const MaxPageNum = 3 //一页最大显示博客数量
+	println(pageId)
 	//访问的page没有超出
-	if tagId <= 0 || len(AllBlogs) < tagId*MaxPageNum+MaxPageNum {
+	if pageId <= 0 || len(AllBlogs) < pageId*MaxPageNum+MaxPageNum {
 		blogs = AllBlogs[0:MaxPageNum : MaxPageNum+1]
 	} else {
-		blogs = AllBlogs[tagId*MaxPageNum : tagId*MaxPageNum+MaxPageNum : MaxPageNum+1]
+		println(pageId * MaxPageNum)
+		println(pageId*MaxPageNum + MaxPageNum)
+		logger.Debugln(len(AllBlogs))
+		blogs = AllBlogs[pageId*MaxPageNum : pageId*MaxPageNum+MaxPageNum]
 	}
 
 	return

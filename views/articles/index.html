@@ -69,12 +69,31 @@
 			</div><!--row-->
 		</div><!--container-->
 		
+		<div>
 		<ul class="pagination">
-			<li class="disabled"><a href="#">Prev</a></li>
-			<li class="active"><a href="#">1</a></li>
-			<li><a href="#">2</a></li>
-			<li><a href="#">Next</a></li>
+			{{$curPage := .CurPage}}
+			
+		    {{if eq 1 .CurPage}}
+				<li class="disabled"><a href="#">Prev</a></li>
+			{{else}}
+				<li><a href="/articles?page={{$curPage}}">Prev</a></li>
+			{{end}}
+			
+			{{range $elmt := .Page}}
+				{{if eq $curPage  $elmt}}
+					<li class="active"><a href="/articles?page={{$elmt}}">{{$elmt}}</a></li>
+				{{else}}
+					<li><a href="/articles?page={{.}}">{{.}}</a></li>
+				{{end}}
+			{{end}}
+			{{$lg := len .Page}}{{/*计算分页页数*/}}
+			{{if eq $lg $curPage}}
+				<li class="disabled"><a href="#">Next</a></li>
+			{{else}}
+				<li><a href="/articles?page={{plus .CurPage}}">Next</a></li>
+			{{end}}
 		</ul>
+		</div>
 		
 		<div id="footer">
      		<div class="container">
