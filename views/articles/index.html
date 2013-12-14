@@ -45,31 +45,41 @@
 			<h1>Macs World！</h1>
 			<p>唯有自律，方能自由！</p>
 		</div>
-		<div class="container">
+		<div class="container"><!--如果要利用row类，一定要把把其包在container类里，不然会出现横向srcollbar-->
 			<div class="row">
-				<div class="col-md-3">
-					<div class="list-group">
-						{{range .Tags}}
-						<a href="/articles?tag={{.Id}}" class="list-group-item">{{.Tag}}</a>
-						{{end}}
-					</div>
-				</div>
-				<div class="col-md-9">
+				<div class="col-md-3"><!--标签-->
+					<div class="panel panel-info">
+						<div class="panel-heading">
+							<h4>标签</h4>
+						</div><!--panel-heading-->
+									
+							<div class="list-group">
+								{{range .Tags}}
+								<a href="/articles?tag={{.Id}}" class="list-group-item">{{.Tag}}</a>
+								{{end}}
+							</div><!--list-group-->
+						
+					</div><!--panel panel-info-->
+				</div><!--col-md-3-->
+				
+				<div class="col-md-9"><!--博客内容-->
+					<ul class="list-group">
 					{{range .Blgs}}
-						<div class="panel panel-info">
-							<div class="panel-heading">
-								<h3><a href="/articles?title={{.Id}}">{{.Title}}</a></h3>
-							</div>
-							<div class="panel-body">
-								<pre>{{.Content}}</pre>
-							</div>
-						</div>
+						<li class="list-group-item list-group-item-success">
+							<h3 class="list-group-item-heading">
+							<a href="/articles?title={{.Id}}">{{.Title}}</a>
+							</h3>
+							<p>{{.Content}}</p>
+						</li>	
 					{{end}}
+					</ul><!--list-group-->
 				</div>
 			</div><!--row-->
 		</div><!--container-->
 		
-		<div>
+		<div class="container"><!--分页-->
+		<div class="row">
+		<div class="col-md-offset-3">
 		<ul class="pagination">
 			{{$curPage := .CurPage}}
 			
@@ -93,6 +103,8 @@
 				<li><a href="/articles?page={{plus .CurPage}}">Next</a></li>
 			{{end}}
 		</ul>
+		</div><!-- col-md -->
+		</div><!-- row -->
 		</div>
 		
 		<div id="footer">
