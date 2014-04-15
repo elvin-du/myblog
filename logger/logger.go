@@ -20,9 +20,9 @@ var (
 )
 
 func init() {
-	os.MkdirAll(infoFileDir, os.ModeDir)
-	os.MkdirAll(debugFileDir, os.ModeDir)
-	os.MkdirAll(errorFileDir, os.ModeDir)
+	os.MkdirAll(infoFileDir, os.ModePerm)
+	os.MkdirAll(debugFileDir, os.ModePerm)
+	os.MkdirAll(errorFileDir, os.ModePerm)
 }
 
 type logger struct {
@@ -38,7 +38,7 @@ func New(out io.Writer) *logger {
 func Infof(format string, args ...interface{}) {
 	//create log file name by current time
 	logName := utils.GetCurrentTime() + ".info"
-	file, err := os.OpenFile(infoFileDir+logName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
+	file, err := os.OpenFile(infoFileDir+logName, os.O_RDWR|os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
 		log.Println(err)
 		return
@@ -52,7 +52,7 @@ func Infof(format string, args ...interface{}) {
 */
 func Infoln(args ...interface{}) {
 	logName := utils.GetCurrentTime() + ".info"
-	file, err := os.OpenFile(infoFileDir+logName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
+	file, err := os.OpenFile(infoFileDir+logName, os.O_RDWR|os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
 		log.Println(err)
 		return

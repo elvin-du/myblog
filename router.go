@@ -2,11 +2,11 @@ package main
 
 import (
 	//"code.google.com/p/go.net/websocket"
+	"log"
 	"myblog/controllers"
 	"myblog/logger"
 	"net/http"
 	"strings"
-	"log"
 )
 
 const (
@@ -15,7 +15,7 @@ const (
 	adminUrl    = "/admin"
 	wsUrl       = "/ws"
 	contactUrl  = "/contact"
-	aboutUrl  	= "/about"
+	aboutUrl    = "/about"
 )
 
 /*
@@ -39,10 +39,10 @@ func router(rw http.ResponseWriter, req *http.Request) {
 		contact := controllers.NewContact()
 		contact.Handler(rw, req)
 	case strings.HasPrefix(urlPath, aboutUrl):
-		about := controllers.NewAbout()
-		about.Handler(rw, req)
-	case strings.HasPrefix(urlPath, "/bootstrap")://static files
-		http.ServeFile(rw,req, "libs" + urlPath)
+		//about := controllers.NewAbout()
+		//about.Handler(rw, req)
+	case strings.HasPrefix(urlPath, "/bootstrap"): //static files
+		http.ServeFile(rw, req, "libs"+urlPath)
 	case strings.HasPrefix(urlPath, "public/"): //static files
 		http.ServeFile(rw, req, urlPath)
 	case urlPath == "/favicon.ico": //the request which browser send automatically

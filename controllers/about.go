@@ -4,50 +4,57 @@
 
 package controllers
 
-import (
-	"html/template"
-	"myblog/logger"
-	"net/http"
-)
+import "lwebf/web"
 
-type About struct {
-	*Controller
+type AboutController struct {
 }
 
-func NewAbout() *About {
-	return &About{
-		Controller: &Controller{},
-	}
-}
-
-/*
-所有[/about]路由的请求，都要经过这里进行转发
-*/
-func (this *About) Handler(rw http.ResponseWriter, req *http.Request) {
-	req.ParseForm()
-	switch req.URL.Path {
-	case "/about":
-		this.AboutHandler(rw, req)
-	default:
-		NotFoundHandler(rw, req)
-	}
-}
-
-/*
-本站介绍
-*/
-func (this *About) AboutHandler(rw http.ResponseWriter, req *http.Request) {
-	switch req.Method {
+func (this *AboutController) IndexAction(ctx *web.Context) {
+	switch ctx.Req.Method {
 	case "GET":
-		t, err := template.ParseFiles("views/about/about.html")
-		if nil != err {
-			logger.Errorln(err)
-			return
-		}
-		if err = t.Execute(rw, nil); nil != err {
-			logger.Errorln(err)
-			return
-		}
-	case "POST":
+		ctx.RW.Write([]byte(`This is Oliver's blog`))
+	default:
 	}
 }
+
+//type About struct {
+//	*Controller
+//}
+
+//func NewAbout() *About {
+//	return &About{
+//		Controller: &Controller{},
+//	}
+//}
+
+///*
+//所有[/about]路由的请求，都要经过这里进行转发
+//*/
+//func (this *About) Handler(rw http.ResponseWriter, req *http.Request) {
+//	req.ParseForm()
+//	switch req.URL.Path {
+//	case "/about":
+//		this.AboutHandler(rw, req)
+//	default:
+//		NotFoundHandler(rw, req)
+//	}
+//}
+
+///*
+//本站介绍
+//*/
+//func (this *About) AboutHandler(rw http.ResponseWriter, req *http.Request) {
+//	switch req.Method {
+//	case "GET":
+//		t, err := template.ParseFiles("views/about/about.html")
+//		if nil != err {
+//			logger.Errorln(err)
+//			return
+//		}
+//		if err = t.Execute(rw, nil); nil != err {
+//			logger.Errorln(err)
+//			return
+//		}
+//	case "POST":
+//	}
+//}
