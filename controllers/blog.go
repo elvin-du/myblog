@@ -1,7 +1,3 @@
-/*
-文章显示
-*/
-
 package controllers
 
 import (

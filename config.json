@@ -2,8 +2,6 @@
     "domain": "dev.myblog.com",
     "host": "127.0.0.1:8888",
     "wshost": "127.0.0.1:6090",
-    "driver_name": "mysql",
-    "dsn": "root:dumx@tcp(localhost:3306)/myblog?charset=utf8",
 	"cookie_secret": "2fwefefwf",
     "smtp_username": "example_username",
 	"smtp_password": "example_password",

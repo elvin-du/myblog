@@ -17,9 +17,4 @@ func main() {
 
 	register()
 	web.Run(config.Config["host"])
-	//if err := http.ListenAndServe(config.Config["host"], http.HandlerFunc(router)); err != nil {
-	//	log.Println("ListenAndServe:", err)
-	//	logger.Errorln("ListenAndServe:", err)
-	//	return
-	//}
 }

@@ -12,7 +12,7 @@ type AboutController struct {
 func (this *AboutController) IndexAction(ctx *web.Context) {
 	switch ctx.Req.Method {
 	case "GET":
-		ctx.RW.Write([]byte(`This is Oliver's blog`))
+		ctx.Write([]byte(`This is Oliver's blog`))
 	default:
 	}
 }
