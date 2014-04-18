@@ -2,7 +2,8 @@ package database
 
 import (
 	"database/sql"
-	"myblog/logger"
+	"fmt"
+	"log"
 	"strings"
 
 	_ "github.com/Go-SQL-Driver/MySQL"
@@ -15,17 +16,7 @@ const (
 
 type Dao struct {
 	*sql.DB
-	// 构造sql语句相关
 	tableName string
-	//where     string
-	//whereVal  []interface{} // where条件对应中字段对应的值
-	//limit     string
-	//order     string
-	//// insert
-	//columns   []string      // 需要插入数据的字段
-	//colValues []interface{} // 需要插入字段对应的值
-	//// query
-	//selectCols []string // default:"*"
 }
 
 func NewDao(tablename string) *Dao {
@@ -41,7 +32,7 @@ func (this *Dao) Open() (err error) {
 func (this *Dao) Insert(data map[string]interface{}) (sql.Result, error) {
 	cols, colsVal := Map2Struct(data)
 	strSql := this.insertSql(cols)
-	logger.Debugln("Insert sql:", strSql)
+	log.Println("Insert sql:", strSql)
 	err := this.Open()
 	if err != nil {
 		return nil, err
@@ -56,64 +47,126 @@ func (this *Dao) Insert(data map[string]interface{}) (sql.Result, error) {
 }
 
 func (this *Dao) insertSql(cols []string) string {
-	sqlStr := "INSERT INTO " + this.tableName + "("
 	colsStr := strings.Join(cols, ",")
-	colsVal := strings.Join(cols, "=?,")
-	sqlStr = colsStr + ") VALUES(" + colsVal + ")"
-	return sqlStr
+	placeHolder := strings.Repeat("?,", len(cols))
+	sqlStr := fmt.Sprintf("INSERT INTO  `%s`(%s)  VALUES(%s)", this.tableName, colsStr, placeHolder[:len(placeHolder)-1])
+	return strings.TrimSpace(sqlStr)
 }
 
 //e.g:["name"]"oliver"
-func (this *Dao) Update(data map[string]interface{}, where string) (sql.Result, error) {
+func (this *Dao) Update(data map[string]interface{}, where map[string]interface{}) error {
 	cols, colsVal := Map2Struct(data)
-	strSql := this.updateSql(cols, where)
-	logger.Debugln("Update sql:", strSql)
-	err := this.Open()
-	if err != nil {
-		return nil, err
-	}
-	defer this.Close()
-	stmt, err := this.Prepare(strSql)
-	if err != nil {
-		return nil, err
-	}
-	defer stmt.Close()
-	return stmt.Exec(colsVal...)
-}
-
-func (this *Dao) updateSql(cols []string, where string) string {
-	updateStr := "UPDATE " + this.tableName + "SET "
-	colsStr := strings.Join(cols, "=?,")
-	updateStr += colsStr + where
-
-	return updateStr
-}
-
-func (this *Dao) Find(data map[string]interface{}, where, order, limit string) error {
-	cols, colsVal := Map2Struct(data)
-	strSql := this.findSql(cols, where, order, limit)
-	logger.Debugln("Find sql:", strSql)
+	ws, wsVal := Map2Struct(where)
+	strSql := this.updateSql(cols, ws)
+	log.Println("Update sql:", strSql)
 	err := this.Open()
 	if err != nil {
 		return err
 	}
 	defer this.Close()
 
-	rows, err := this.Query(strSql)
+	result, err := this.Exec(strSql, append(colsVal, wsVal...)...)
+	if err != nil {
+		return err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	log.Printf("table:`%s` %d columns update success", this.tableName, affected)
+	return nil
+}
+
+func (this *Dao) updateSql(cols []string, where []string) string {
+	colsStr := strings.Join(cols, "=?,") + "=?"
+	whereStr := strings.Join(where, "=?,")
+	if "" != whereStr {
+		whereStr = "WHERE " + whereStr + "=?"
+	}
+	sqlStr := fmt.Sprintf("UPDATE `%s` SET %s %s", this.tableName, colsStr, whereStr)
+	return strings.TrimSpace(sqlStr)
+}
+
+func (this *Dao) FindOne(data map[string]interface{}, where map[string]interface{}, selectCol ...string) error {
+	cols, colsVal := Map2Struct(data)
+	whereS, whereVal := Map2Struct(where)
+	colNum := len(selectCol)
+	if colNum == 0 || (colNum == 1 && selectCol[0] == "*") {
+		selectCol = cols
+	} else {
+		tmp := []interface{}{}
+		for _, v := range selectCol {
+			tmp = append(tmp, data[v])
+		}
+		colsVal = tmp
+	}
+
+	strSql := this.findSql(selectCol, whereS, "", "")
+	log.Println("Find sql:", strSql)
+	err := this.Open()
+	if err != nil {
+		return err
+	}
+	defer this.Close()
+
+	row := this.QueryRow(strSql, whereVal...)
 	if nil != err {
-		logger.Errorln(err)
+		log.Println(err)
 		return err
+	}
+
+	return row.Scan(colsVal...)
+}
+
+func (this *Dao) findSql(cols []string, where []string, order, limit string) string {
+	colsStr := strings.Join(cols, ",")
+	whereStr := strings.Join(where, "=?,")
+	if "" != whereStr {
+		whereStr = "WHERE " + whereStr + "=?"
+	}
+	orderStr := ""
+	if "" != order {
+		orderStr = "ORDER BY " + order
+	}
+	limitStr := ""
+	if "" != whereStr {
+		limitStr = "LIMIT " + limit
+	}
+
+	sqlStr := fmt.Sprintf("SELECT %s FROM %s %s %s %s", colsStr, this.tableName, whereStr, orderStr, limitStr)
+	return strings.TrimSpace(sqlStr)
+}
+
+func (this *Dao) Find(where map[string]interface{}, order, limit string, selectCol ...string) (*sql.Rows, error) {
+	whereS, whereVal := Map2Struct(where)
+	if 0 == len(selectCol) {
+		selectCol = append(selectCol, "*")
+	}
+	strSql := this.findSql(selectCol, whereS, order, limit)
+	log.Println("Find sql:", strSql)
+	err := this.Open()
+	if err != nil {
+		return nil, err
+	}
+	defer this.Close()
+
+	return this.Query(strSql, whereVal...)
+}
+
+func (this *Dao) Scan(rows *sql.Rows, data map[string]interface{}, selectCol ...string) error {
+	_, colsVal := Map2Struct(data)
+	colNum := len(selectCol)
+	if colNum > 1 && (colNum == 1 && selectCol[0] != "*") {
+		tmp := []interface{}{}
+		for _, v := range selectCol {
+			tmp = append(tmp, data[v])
+		}
+		colsVal = tmp
 	}
 
 	if rows.Next() {
-		return rows.Scan(colsVal...)
+		rows.Scan(colsVal...)
 	}
 
 	return rows.Err()
-}
-
-func (this *Dao) findSql(cols []string, where, order, limit string) string {
-	selectStr := "SELECT " + strings.Join(cols, ",") + " FROM " + this.tableName
-	selectStr += " " + where + " ORDER BY " + order + " LIMIT " + limit
-	return selectStr
 }

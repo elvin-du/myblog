@@ -3,40 +3,49 @@ package main
 import (
 	"log"
 	"myblog/database"
-	"myblog/logger"
-	"strings"
-	"time"
 )
 
 func main() {
 	InitDB()
 }
 
+type blogs struct {
+	Id          int
+	Title       string
+	Content     string
+	CreatedDate string
+	TagId       int
+}
+
+func (this *blogs) fieldMap() map[string]interface{} {
+	return map[string]interface{}{
+		"id":           &this.Id,
+		"title":        &this.Title,
+		"content":      &this.Content,
+		"created_date": &this.CreatedDate,
+		"tag_id":       &this.TagId,
+	}
+}
+
 func InitDB() {
-	db, err := database.Open()
-	if nil != err {
-		log.Fatal(err)
-	}
-	defer db.Close()
+	dao := database.NewDao("blogs")
+	blog := &blogs{}
+	rows, err := dao.Find(nil, "tag_id", "")
+	dao.Scan(rows, blog.fieldMap())
+	log.Println(err)
+	log.Println(*blog)
 
-	//构建Sql语句
-	insertSql := "INSERT myblog.blogs SET content=?, title=?, create_date=?, tag_id=?"
-	stmt, err := db.Prepare(insertSql)
-	if nil != err {
-		logger.Errorln(err)
-		return err
-	}
-	defer stmt.Close()
+	//insertData := make(map[string]interface{})
+	//insertData["title"] = "japan"
+	//insertData["content"] = "amarican"
+	//insertData["created_date"] = time.Now().String()
+	//insertData["tag_id"] = 996
 
-	//replacer := strings.NewReplacer(" ", "&nbsp", "\r", "<br/>")
-	//content = replacer.Replace(content)
-	//获取插入时间
-	now := strings.Split(time.Now().String(), " ")[0]
-	//执行SQL语句
-	_, err = stmt.Exec(content, title, now, tagId)
-	if nil != err {
-		logger.Errorln(err)
-		return err
-	}
+	//where := make(map[string]interface{})
+	//where["tag_id"] = 12345
 
+	//_, err := dao.Insert(insertData)
+	//if nil != err {
+	//	log.Fatal(err)
+	//}
 }
