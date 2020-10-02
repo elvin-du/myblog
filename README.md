@@ -2,7 +2,7 @@
 
 ## description
 
-> a blog websit with golang and html5
+> a blog websit with golang and html5 , new cool blogs visit here
 	
 ## install
 
